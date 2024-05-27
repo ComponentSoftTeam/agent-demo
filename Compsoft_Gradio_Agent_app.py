@@ -375,8 +375,9 @@ with gr.Blocks(title="CompSoft") as demo:
     #flag_btn.click(lambda *args: callback.flag(args), [modelfamily, model_type, chatbot], None, preprocess=False)
     
     gr.Examples(
-        ["What is the square root of 4?", "How many people live in Budapest?", "What will be the weather like tomorrow in Budapest?", "What are the 10 most important news in Budapest Hungary? Answer in 10 bullet points.",  
-         "Who won the most Oscars in this year?", "List the title of 10 scientific papers about LLM agents published in this year.", "What are the maximum, minimum and average temperature values as well as the sum of precipitations tomorrow in Budapest?", 
+        ["What is the square root of 4?", "How many people live in Budapest?", "What will be the weather like tomorrow in Budapest?", "What are the 10 most important news in Budapest? Answer in 10 bullet points.",  
+         "Who won the most Oscars in this year?", "List the title of 10 scientific papers about LLM agents published in this year.", 
+         "Create a table that contains the date as well as the maximum, minimum and average temperature values as well as the sum of precipitations separately for each the coming 3 days in Budapest?", 
          "Create a table that contains the date as well as the maximum, minimum and average temperature values as well as the sum of precipitations separately for each of the coming 7 days in Budapest. Then include a line with each of the average of the maximum, minimum and avarage temperature values for these 7 days. And after all that also write a list with 10 current news in Budapest Hungary.",
         ],
         prompt
