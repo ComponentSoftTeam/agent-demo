@@ -335,7 +335,7 @@ def thoughts_func() -> str | None:
 # +
 import random
 import gradio as gr
-trace_list = ["You'll see the agents' thoughts here"]
+trace_list = ["**Agent's thoughts:**"]
 trace = ""
 
 gr.close_all()
@@ -344,7 +344,7 @@ gr.close_all()
 
 with gr.Blocks(title="CompSoft") as demo:
     #session_id = gr.Textbox(value = uuid.uuid4, interactive=False, visible=False)
-    gr.Markdown("# Component Soft Agent Demo")
+    gr.Markdown("# Component Soft Agent Demo (Calculator, Websearch, Wikipedia, Arxiv, Weather, News)")
     system_prompt = gr.Textbox(label="System prompt", value=system_prompt_text)
     with gr.Row():
         modelfamily = gr.Dropdown(list(modelfamilies_model_dict.keys()), label="Model family", value="OpenAI GPT")
