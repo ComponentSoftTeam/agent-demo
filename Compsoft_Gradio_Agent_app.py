@@ -133,7 +133,7 @@ class VariableCallbackHandler(BaseCallbackHandler):
 
     def _on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         response1 = str(response)
-        trace_list.append(response1)
+        trace_list.append(response1)"""
 
     def on_text(
         self,
@@ -142,7 +142,8 @@ class VariableCallbackHandler(BaseCallbackHandler):
         end: str = "",
         **kwargs: Any,
     ) -> None:
-        trace_list.appendtext)"""
+        newtext = f"\n{text}\n"
+        trace_list.append(newtext)
 
     def on_agent_finish(
         self, finish: AgentFinish, color: Optional[str] = None, **kwargs: Any
