@@ -91,7 +91,7 @@ class VariableCallbackHandler(BaseCallbackHandler):
 
     def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
         """Print out that we finished a chain."""
-        trace_list.append(f"\n> *Finished chain.*")
+        trace_list.append(f"\n> *Finished AgentExecutor chain.*")
         """if outputs["observation"]:
             observation = outputs["observation"]
             trace_list.append(f"\n{observation}\n")
@@ -104,8 +104,9 @@ class VariableCallbackHandler(BaseCallbackHandler):
         self, action: AgentAction, color: Optional[str] = None, **kwargs: Any
     ) -> Any:
         """Run on agent action."""
-        new_text = action.log.strip("\n ")
-        trace_list.append(f"\n{new_text}\n")
+        action_log = action.log.strip("\n ")
+        new_text = f"AGENT ACTION: {action_log}\n"
+        trace_list.append(f"\n{new_text}")
         #kwarg = str(kwargs)
         #trace_list.append(kwarg)
 
@@ -142,7 +143,7 @@ class VariableCallbackHandler(BaseCallbackHandler):
         end: str = "",
         **kwargs: Any,
     ) -> None:
-        newtext = f"\n{text}\n"
+        newtext = f"{text}\n"
         trace_list.append(newtext)
 
     def on_agent_finish(
@@ -151,7 +152,8 @@ class VariableCallbackHandler(BaseCallbackHandler):
         """Run on agent end."""
         #print_text(finish.log, color=color or self.color, end="\n")
         #new_text = print_text(finish.log, color=color or self.color, end="\n")
-        trace_list.append(finish.log)
+        new_text = f"\nFINAL ANSWER: {finish.log}\n"
+        trace_list.append(new_text)
         #kwarg = str(kwargs)
         #trace_list.append(kwarg)
 
