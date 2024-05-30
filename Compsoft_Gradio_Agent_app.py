@@ -78,20 +78,21 @@ class VariableCallbackHandler(BaseCallbackHandler):
     """Callback Handler that prints to a variable."""
 
     """def __init__(self, color: Optional[str] = None) -> None:
-        Initialize callback handler.
-"""
+        Initialize callback handler."""
 
     def on_chain_start(
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
         """Print out that we are entering a chain."""
-        class_name = serialized.get("name", serialized.get("id", ["<unknown>"])[-1])
-        trace_list.append(f"\n> *Entering new {class_name} chain...*\n")
+        """class_name = serialized.get("name", serialized.get("id", ["<unknown>"])[-1])
+        trace_list.append(f"{serialized}\n")"""
+        trace_list.append(f">> ENTERING AgentExecutor CHAIN\n")
+        
         #trace_list.append(f"\n> *{inputs}")
 
     def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
         """Print out that we finished a chain."""
-        trace_list.append(f"\n> *Finished AgentExecutor chain.*")
+        trace_list.append(f">> FINISHED AgentExecutor CHAIN.")
         """if outputs["observation"]:
             observation = outputs["observation"]
             trace_list.append(f"\n{observation}\n")
@@ -105,7 +106,7 @@ class VariableCallbackHandler(BaseCallbackHandler):
     ) -> Any:
         """Run on agent action."""
         action_log = action.log.strip("\n ")
-        new_text = f"AGENT ACTION: {action_log}\n"
+        new_text = f"REFLECTION: {action_log}\nACTION: Executing {action.tool}\n"
         trace_list.append(f"\n{new_text}")
         #kwarg = str(kwargs)
         #trace_list.append(kwarg)
@@ -276,7 +277,7 @@ varcallhandler = VariableCallbackHandler()
 def exec_agent(chatbot, system_prompt ="", prompt="I have no request", model_type="mistral-large-latest"):
     global trace_list
     trace_list.clear()
-    trace_list.append("**Agent's thoughts:**")
+    #trace_list.append("**Agent's thoughts:**")
     chat = chatbot or []
     chat.append([prompt, ""])
     trace = ""    
@@ -298,7 +299,7 @@ def exec_agent(chatbot, system_prompt ="", prompt="I have no request", model_typ
 def exec_agent_streaming(chatbot, system_prompt ="", prompt="I have no request", model_type="mistral-large-latest"):
     global trace_list
     trace_list.clear()
-    trace_list.append("**Agent's thoughts:**")
+    #trace_list.append("**Agent's thoughts:**")
     chat = chatbot or []
     chat.append([prompt, ""])
     trace = ""
@@ -335,7 +336,8 @@ def thoughts_func() -> str | None:
 # +
 import random
 import gradio as gr
-trace_list = ["**Agent's thoughts:**"]
+#trace_list = ["**Agent's thoughts:**"]
+trace_list = []
 trace = ""
 
 gr.close_all()
