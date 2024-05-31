@@ -378,8 +378,8 @@ with gr.Blocks(title="CompSoft") as demo:
         model_type = list(modelfamilies_model_dict[modelfamily])
         return gr.Dropdown(choices=model_type, value=model_type[0], interactive=True)
 
-    #submit_btn_streaming.click(exec_agent, inputs=[chatbot, system_prompt, prompt, model_type], outputs=[chatbot, prompt])
-    submit_btn_nostreaming.click(exec_agent_streaming, inputs=[chatbot, system_prompt, prompt, model_type], outputs=[chatbot, prompt])
+    #submit_btn_streaming.click(exec_agent_streaming, inputs=[chatbot, system_prompt, prompt, model_type], outputs=[chatbot, prompt])
+    submit_btn_nostreaming.click(exec_agent, inputs=[chatbot, system_prompt, prompt, model_type], outputs=[chatbot, prompt])
     clear_btn.click(clear_texts, outputs=[prompt, chatbot, thoughts], )
 
     #callback.setup([modelfamily, model_type, chatbot], "flagged_data_points")
