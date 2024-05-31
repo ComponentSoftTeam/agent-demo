@@ -37,6 +37,7 @@ Financial_news_api_key=os.environ["ALPHAVANTAGE_API_KEY"]
 
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_genai import GoogleGenerativeAI
 from langchain_mistralai.chat_models import ChatMistralAI
 from langchain_fireworks.chat_models import ChatFireworks
 from langchain_core.output_parsers.string import StrOutputParser
@@ -106,7 +107,7 @@ class VariableCallbackHandler(BaseCallbackHandler):
     ) -> Any:
         """Run on agent action."""
         action_log = action.log.strip("\n ")
-        new_text = f"REFLECTION: {action_log}\nACTION: Executing {action.tool}\n"
+        new_text = f"REASONING: {action_log}\nACTION: Executing {action.tool}\n"
         trace_list.append(f"\n{new_text}")
         #kwarg = str(kwargs)
         #trace_list.append(kwarg)
@@ -204,14 +205,18 @@ def get_chain(model_type="mistral-large-latest"):
             max_tokens=MAX_NEW_TOKENS,
         ),
         "gemini-1.5-flash-latest": ChatGoogleGenerativeAI(
+        #"gemini-1.5-flash-latest": GoogleGenerativeAI(
             model="gemini-1.5-flash-latest",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
+            convert_system_message_to_human=True
         ),        
         "gemini-1.5-pro-latest": ChatGoogleGenerativeAI(
+        #"gemini-1.5-pro-latest": GoogleGenerativeAI(
             model="gemini-1.5-pro-latest",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
+            convert_system_message_to_human=True
         )
     }
     llm = LLM_MODELS[model_type]
@@ -245,6 +250,7 @@ def get_chain(model_type="mistral-large-latest"):
         ("placeholder", "{agent_scratchpad}"),
     ])
     agent = create_tool_calling_agent(llm, tools, prompt)
+    
     agent_executor = AgentExecutor(agent=agent, tools=tools, callbacks=[varcallhandler], verbose = False)
     #agent_executor = AgentExecutor(agent=agent, tools=tools, verbose = True)
     # , enable_automatic_function_calling=True
