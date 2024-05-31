@@ -85,15 +85,13 @@ class VariableCallbackHandler(BaseCallbackHandler):
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
         """Print out that we are entering a chain."""
-        """class_name = serialized.get("name", serialized.get("id", ["<unknown>"])[-1])
-        trace_list.append(f"{serialized}\n")"""
+        """class_name = serialized.get("name", serialized.get("id", ["<unknown>"])[-1])"""
+        #trace_list.append(f"\n{serialized}\n")
+        #trace_list.append(f"\n> *{inputs}\n")
         trace_list.append(f">> ENTERING AgentExecutor CHAIN\n")
-        
-        #trace_list.append(f"\n> *{inputs}")
 
     def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
         """Print out that we finished a chain."""
-        trace_list.append(f">> FINISHED AgentExecutor CHAIN.")
         """if outputs["observation"]:
             observation = outputs["observation"]
             trace_list.append(f"\n{observation}\n")
@@ -101,14 +99,16 @@ class VariableCallbackHandler(BaseCallbackHandler):
             #output = str(outputs)
             #trace_list.append(f"\n> *Finished chain with output: {outputs}.*")
             trace_list.append(f"\n> *Finished chain.*")"""
+        trace_list.append(f"\n>> FINISHED AgentExecutor CHAIN.")
         
     def on_agent_action(
         self, action: AgentAction, color: Optional[str] = None, **kwargs: Any
     ) -> Any:
         """Run on agent action."""
         action_log = action.log.strip("\n ")
-        new_text = f"REASONING: {action_log}\nACTION: Executing {action.tool}\n"
+        new_text = f"REASONING: {action_log}\n"
         trace_list.append(f"\n{new_text}")
+        #trace_list.append(f"\non_agent_action = {action}\n")
         #kwarg = str(kwargs)
         #trace_list.append(kwarg)
 
@@ -122,12 +122,12 @@ class VariableCallbackHandler(BaseCallbackHandler):
     ) -> None:
         """If not the final action, print out observation."""
         if observation_prefix is not None:
-            trace_list.append(observation_prefix)
-        output = str(outputs)
-        trace_list.append(outputs)
-        #kwarg = str(kwargs)
-        #trace_list.append(kwarg)
+            trace_list.append(f"\nobservation_prefix = {observation_prefix}\n")
+        if outputs is not None:
+            output = str(outputs)
+            trace_list.append(f"\noutput = {output}\n")
         if llm_prefix is not None:
+            trace_list.append(f"\nllm_prefix = {llm_prefix}\n")
             trace_list.append(llm_prefix)
 
     """def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
@@ -394,9 +394,9 @@ with gr.Blocks(title="CompSoft") as demo:
         prompt
     )
 
-#demo.launch(show_error=True)
+demo.launch(show_error=True)
 #demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=("Ericsson", "Torshamnsgatan21"), max_threads=20, show_error=True, state_session_capacity=20)
-demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=("CompSoft", "Bikszadi16"), max_threads=20, show_error=True, favicon_path="data/favicon.ico", state_session_capacity=20)
+#demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=("CompSoft", "Bikszadi16"), max_threads=20, show_error=True, favicon_path="data/favicon.ico", state_session_capacity=20)
 # -
 
 
