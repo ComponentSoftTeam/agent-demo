@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -47,10 +47,11 @@ from langchain_core.output_parsers.string import StrOutputParser
 
 from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_community.utilities.duckduckgo_search import DuckDuckGoSearchAPIWrapper
-#from langchain_community.tools.ddg_search.tool import DuckDuckGoSearchRun
 
 from langchain.agents import create_tool_calling_agent, AgentExecutor
-from langchain_community.agent_toolkits.load_tools import load_tools
+#from langchain_community.agent_toolkits.load_tools import load_tools
+from local_load_tools import load_tools
+
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.globals import set_debug, set_verbose
 from langchain_core.output_parsers.string import StrOutputParser
@@ -199,18 +200,16 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
             max_tokens=MAX_NEW_TOKENS,
         ),
         "gemini-1.5-flash-latest": ChatGoogleGenerativeAI(
-        #"gemini-1.5-flash-latest": GoogleGenerativeAI(
             model="gemini-1.5-flash-latest",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
-            convert_system_message_to_human=True
+            #convert_system_message_to_human=True
         ),        
         "gemini-1.5-pro-latest": ChatGoogleGenerativeAI(
-        #"gemini-1.5-pro-latest": GoogleGenerativeAI(
             model="gemini-1.5-pro-latest",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
-            convert_system_message_to_human=True
+            #convert_system_message_to_human=True
         )
     }
     llm = LLM_MODELS[model_type]
@@ -245,7 +244,7 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
     ])
     agent = create_tool_calling_agent(llm, tools, prompt)
     
-    agent_executor = AgentExecutor(agent=agent, tools=tools, callbacks=[VariableCallbackHandler(session_id)], verbose = False)
+    agent_executor = AgentExecutor(agent=agent, tools=tools, callbacks=[VariableCallbackHandler(session_id)], verbose = False, stream_runnable=False)
     #agent_executor = AgentExecutor(agent=agent, tools=tools, verbose = True)
     # , enable_automatic_function_calling=True
     agent_chain = agent_executor | itemgetter("output")
@@ -255,12 +254,13 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
 # +
 modelfamilies_model_dict = {
     "OpenAI GPT": ["gpt-4-turbo", "gpt-4o", "gpt-3.5-turbo"],
-    # "Google Gemini": ["gemini-1.5-pro-latest", "gemini-1.5-flash-latest"],    
+    "Google Gemini": ["gemini-1.5-pro-latest", "gemini-1.5-flash-latest"],    
     "MistralAI Mistral": ["mistral-large-latest", "open-mixtral-8x22b", "mistral-small-latest"],
 }
 
 def generate_system_prompt():
-    return f"You're a helpful assistant. Always use tools to answer questions. Always use the Calculator for calculations, even when adding 2 numbers or calculating averages. The current date is {datetime.today().strftime('%Y-%m-%d')}."
+    #return f"You're a helpful assistant. Always use tools to answer questions. Always use the Calculator for calculations, even when adding 2 numbers or calculating averages. The current date is {datetime.today().strftime('%Y-%m-%d')}."
+    return f"You're a helpful assistant. Always use tools to answer questions. Always use the Calculator for calculations, even when adding 2 numbers or calculating averages. The current date is {datetime.today().strftime('%Y-%m-%d')}"
 
 prompt_text = "What is the square root of 4?"
 #prompt = f"Create a table that contains the date as well as the maximum, minimum and average temperature values as well as the sum of precipitations in the coming 7 days in Budapest"
@@ -288,7 +288,7 @@ def thoughts_func(session_id) -> str | None:
     if session_id not in trace_list:
         return ""
     
-    print(f"The session id is: {session_id}")
+    #print(f"The session id is: {session_id}")
     trace = ""
     for trace_item in trace_list[session_id]:
         #print(f"{i}, {trace_item}")
@@ -307,7 +307,7 @@ def exec_agent(chatbot, session_id: str, system_prompt ="", prompt="I have no re
     agent_chain = get_chain(session_id, model_type=model_type)
     response = agent_chain.invoke({"input": prompt, "system_prompt": system_prompt})
 
-    print([response])
+    #print([response])
 
     # trace = ""
     # for i, trace_item in enumerate(trace_list):
@@ -400,9 +400,11 @@ with gr.Blocks(title="CompSoft") as demo:
         prompt
     )
 
-# demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=("Ericsson", "Torshamnsgatan21"), max_threads=20, show_error=True, state_session_capacity=20)
-demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=("CompSoft", "Bikszadi16"), max_threads=20, show_error=True, favicon_path="data/favicon.ico", state_session_capacity=20)
+demo.launch(share=True)
+#demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=("CompSoft", "Bikszadi16"), max_threads=20, show_error=True, favicon_path="data/favicon.ico", state_session_capacity=20)
 # -
+
+
 
 
 
