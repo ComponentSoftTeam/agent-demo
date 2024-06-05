@@ -400,8 +400,8 @@ with gr.Blocks(title="CompSoft") as demo:
         prompt
     )
 
-demo.launch(share=True)
-#demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=("CompSoft", "Bikszadi16"), max_threads=20, show_error=True, favicon_path="data/favicon.ico", state_session_capacity=20)
+#demo.launch()
+demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=("CompSoft", "Bikszadi16"), max_threads=20, show_error=True, favicon_path="data/favicon.ico", state_session_capacity=20)
 # -
 
 
