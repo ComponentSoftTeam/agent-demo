@@ -40,7 +40,6 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_google_genai import GoogleGenerativeAI
 from langchain_mistralai.chat_models import ChatMistralAI
 from langchain_fireworks.chat_models import ChatFireworks
-from langchain_core.output_parsers.string import StrOutputParser
 
 # +
 #from langchain.tools import WikipediaQueryRun
@@ -48,13 +47,13 @@ from langchain_core.output_parsers.string import StrOutputParser
 from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_community.utilities.duckduckgo_search import DuckDuckGoSearchAPIWrapper
 
-from langchain.agents import create_tool_calling_agent, AgentExecutor
-#from langchain_community.agent_toolkits.load_tools import load_tools
-from local_load_tools import load_tools
-
+from langchain.agents import create_tool_calling_agent, create_react_agent, AgentExecutor
+from langchain_community.agent_toolkits.load_tools import load_tools
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.globals import set_debug, set_verbose
 from langchain_core.output_parsers.string import StrOutputParser
+
+from langchain import hub
 
 set_debug(False)
 set_verbose(False)
@@ -168,7 +167,12 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
     MAX_NEW_TOKENS = 4000
 
     LLM_MODELS = {
-        "Llama-2-70-firefunction-v1": ChatFireworks(
+        "llama-3-70b-prompting": ChatFireworks(
+            model_name="accounts/fireworks/models/llama-v3-70b-instruct",
+            temperature=TEMPERATURE,
+            max_tokens=MAX_NEW_TOKENS,
+        ),
+        "Llama-2-70b-firefunction-v1": ChatFireworks(
             model_name="accounts/fireworks/models/firefunction-v1",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,            
@@ -239,14 +243,20 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
     
     tools=[llm_math_tool, news_tool, weather_tool, arxiv_tool, wikipedia_tool, websearch_tool] # More tools could be added
     # Be careful with older tools, they might break with newer models
-    print(llm_math_tool)
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", "{system_prompt}"),
-        ("placeholder", "{chat_history}"),
-        ("human", "{input}"),
-        ("placeholder", "{agent_scratchpad}"),
-    ])
-    agent = create_tool_calling_agent(llm, tools, prompt)
+    
+    print(model_type)
+    
+    if model_type == "llama-3-70b-prompting":
+        prompt_react = hub.pull("hwchase17/react")
+        agent = create_react_agent(llm, tools, prompt_react)
+    else:
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", "{system_prompt}"),
+            ("placeholder", "{chat_history}"),
+            ("human", "{input}"),
+            ("placeholder", "{agent_scratchpad}"),
+        ])        
+        agent = create_tool_calling_agent(llm, tools, prompt)
     
     agent_executor = AgentExecutor(agent=agent, tools=tools, callbacks=[VariableCallbackHandler(session_id)], verbose = False, stream_runnable=False)
     #agent_executor = AgentExecutor(agent=agent, tools=tools, verbose = True)
@@ -260,7 +270,7 @@ modelfamilies_model_dict = {
     "OpenAI GPT": ["gpt-4-turbo", "gpt-4o", "gpt-3.5-turbo"],
     "Google Gemini": ["gemini-1.5-pro-latest", "gemini-1.5-flash-latest"],    
     "MistralAI Mistral": ["mistral-large-latest", "open-mixtral-8x22b", "mistral-small-latest"],
-    "Meta Llama" : ["Llama-2-70-firefunction-v1"],
+    "Meta Llama" : ["llama-3-70b-prompting", "Llama-2-70b-firefunction-v1"],
 }
 
 def generate_system_prompt():
