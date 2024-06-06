@@ -108,6 +108,13 @@ class VariableCallbackHandler(BaseCallbackHandler):
         #kwarg = str(kwargs)
         #trace_list_append(self._session_id,  kwarg)
 
+    def on_tool_start(
+        self,
+        **kwargs: Any,
+    ) -> None:
+        kwarg = str(kwargs)
+        trace_list_append(self._session_id,  kwarg)
+
     def on_tool_end(
         self,
         outputs: Any,
@@ -118,12 +125,9 @@ class VariableCallbackHandler(BaseCallbackHandler):
     ) -> None:
         """If not the final action, print out observation."""
         if observation_prefix is not None:
-            trace_list_append(self._session_id,  f"\nobservation_prefix = {observation_prefix}\n")
-        
+            trace_list_append(self._session_id,  f"\nobservation_prefix = {observation_prefix}\n")        
         if outputs:
             trace_list_append(self._session_id, f"\noutput = {str(outputs)}\n")
-
-
         if llm_prefix:
             trace_list_append(self._session_id,  f"\nllm_prefix = {llm_prefix}\n")
 
@@ -164,7 +168,7 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
     MAX_NEW_TOKENS = 4000
 
     LLM_MODELS = {
-        "firefunction": ChatFireworks(
+        "Llama-2-70-firefunction-v1": ChatFireworks(
             model_name="accounts/fireworks/models/firefunction-v1",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,            
@@ -235,7 +239,7 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
     
     tools=[llm_math_tool, news_tool, weather_tool, arxiv_tool, wikipedia_tool, websearch_tool] # More tools could be added
     # Be careful with older tools, they might break with newer models
-    #print(tools)
+    print(llm_math_tool)
     prompt = ChatPromptTemplate.from_messages([
         ("system", "{system_prompt}"),
         ("placeholder", "{chat_history}"),
@@ -256,6 +260,7 @@ modelfamilies_model_dict = {
     "OpenAI GPT": ["gpt-4-turbo", "gpt-4o", "gpt-3.5-turbo"],
     "Google Gemini": ["gemini-1.5-pro-latest", "gemini-1.5-flash-latest"],    
     "MistralAI Mistral": ["mistral-large-latest", "open-mixtral-8x22b", "mistral-small-latest"],
+    "Meta Llama" : ["Llama-2-70-firefunction-v1"],
 }
 
 def generate_system_prompt():
