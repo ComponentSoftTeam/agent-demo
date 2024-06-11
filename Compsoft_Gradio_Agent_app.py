@@ -226,13 +226,13 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
     parser = StrOutputParser()
     
     #tool_prompt = f"Create a table that contains the date as well as the maximum, minimum and avarage temperature values separately for each of 2024-05-18, 2024-05-19 and 2024-05-20 in Budapest."
-    tool_prompt = f"Create a table that contains the date as well as the maximum, minimum and avarage temperature values as well as the sum of precipitations separately for each of the coming 7 days in Budapest"
-    prompt_text = "What are the maximum, minimum and average temperature values as well as the sum of precipitations tomorrow in Budapest?"
+    #tool_prompt = f"Create a table that contains the date as well as the maximum, minimum and avarage temperature values as well as the sum of precipitations separately for each of the coming 7 days in Budapest"
+    #prompt_text = "What are the maximum, minimum and average temperature values as well as the sum of precipitations tomorrow in Budapest?"
 
     
     #pubmed_tool = PubmedQueryRun()
     #llm_math_tool, wikipedia_tool, weather_tool, news_tool = load_tools(["llm-math","wikipedia", "open-meteo-api", "news-api"], news_api_key=News_api_key, llm=llm)
-    llm_math_tool, websearch_tool, wikipedia_tool, arxiv_tool, weather_tool, news_tool = load_tools(["llm-math","ddg-search", "wikipedia", "arxiv", "open-meteo-api", "news-api"], news_api_key=News_api_key, llm=llm)
+    llm_math_tool, weather_tool, news_tool, wikipedia_tool, arxiv_tool, websearch_tool = load_tools(["llm-math", "open-meteo-api", "news-api", "wikipedia", "arxiv", "ddg-search"], news_api_key=News_api_key, llm=llm)
     #llm_math_tool.invoke("What is the square root of 4?", verbose=True)
     #wikipedia_tool.invoke("How many people live in Prague?", verbose=True)
     #print(weather_tool.invoke(tool_prompt, verbose=True))
