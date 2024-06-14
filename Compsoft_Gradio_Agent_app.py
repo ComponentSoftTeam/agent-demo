@@ -37,9 +37,11 @@ News_api_key = os.environ["NEWS_API_KEY"]
 
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_google_genai import GoogleGenerativeAI
+from langchain_anthropic import ChatAnthropic
+from langchain_google_vertexai import ChatVertexAI
 from langchain_mistralai.chat_models import ChatMistralAI
 from langchain_fireworks.chat_models import ChatFireworks
+from langchain_core.output_parsers.string import StrOutputParser
 
 # +
 #from langchain.tools import WikipediaQueryRun
@@ -103,8 +105,10 @@ class VariableCallbackHandler(BaseCallbackHandler):
         """Run on agent action."""
         action_log = action.log.strip("\n ")
         new_text = f"REASONING: {action_log}\n"
+        #message_log = str(action.message_log).strip("\n ")
+        #new_text = f"REASONING: {action_log}\n{message_log}\n"
         trace_list_append(self._session_id,  f"\n{new_text}")
-        #kwarg = str(kwargs)
+        #kwarg = str(kwar#gs)
         #trace_list_append(self._session_id,  kwarg)
 
     def on_tool_start(
@@ -116,12 +120,14 @@ class VariableCallbackHandler(BaseCallbackHandler):
 
     def on_tool_end(
         self,
-        outputs: Any,
-        color: Optional[str] = None,
-        observation_prefix: Optional[str] = None,
-        llm_prefix: Optional[str] = None,
+        #outputs: Any,
+        #color: Optional[str] = None,
+        #observation_prefix: Optional[str] = None,
+        #llm_prefix: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
+        kwarg = str(kwargs)
+        trace_list_append(self._session_id,  kwarg)
         """If not the final action, print out observation."""
         if observation_prefix is not None:
             trace_list_append(self._session_id,  f"\nobservation_prefix = {observation_prefix}\n")        
@@ -164,14 +170,19 @@ class VariableCallbackHandler(BaseCallbackHandler):
 def get_chain(session_id: str, model_type="mistral-large-latest"):
     
     TEMPERATURE = 0.0
-    MAX_NEW_TOKENS = 4000
+    MAX_NEW_TOKENS = 4000  
 
     LLM_MODELS = {
+        "llama-v2-70b-prompting": ChatFireworks(
+            model_name="accounts/fireworks/models/llama-v2-70b-chat",
+            temperature=TEMPERATURE,
+            max_tokens=MAX_NEW_TOKENS,            
+        ),
         "llama-3-70b-prompting": ChatFireworks(
             model_name="accounts/fireworks/models/llama-v3-70b-instruct",
             temperature=TEMPERATURE,
-            max_tokens=MAX_NEW_TOKENS,
-        ),
+            max_tokens=MAX_NEW_TOKENS,            
+        ),    
         "Llama-2-70b-firefunction-v1": ChatFireworks(
             model_name="accounts/fireworks/models/firefunction-v1",
             temperature=TEMPERATURE,
@@ -181,19 +192,24 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
             model="gpt-3.5-turbo",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
-        ), 
-        "gpt-4-turbo": ChatOpenAI(
-            model="gpt-4-turbo",
-            temperature=TEMPERATURE,
-            max_tokens=MAX_NEW_TOKENS,
-        ), 
+        ),    
         "gpt-4o": ChatOpenAI(
             model="gpt-4o",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
+        "gpt-4-turbo": ChatOpenAI(
+            model="gpt-4-turbo",
+            temperature=TEMPERATURE,
+            max_tokens=MAX_NEW_TOKENS,
+        ),        
         "mistral-large-latest": ChatMistralAI(
             model="mistral-large-latest",
+            temperature=TEMPERATURE,
+            max_tokens=MAX_NEW_TOKENS,
+        ),
+        "open-mixtral-8x22b": ChatMistralAI(
+            model="open-mixtral-8x22b",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
@@ -202,23 +218,33 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),        
-        "open-mixtral-8x22b": ChatMistralAI(
-            model="open-mixtral-8x22b",
-            temperature=TEMPERATURE,
-            max_tokens=MAX_NEW_TOKENS,
-        ),
         "gemini-1.5-flash-latest": ChatGoogleGenerativeAI(
             model="gemini-1.5-flash-latest",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
-            #convert_system_message_to_human=True
-        ),        
+        ),
         "gemini-1.5-pro-latest": ChatGoogleGenerativeAI(
-            model="gemini-1.5-pro-latest",
+        #"gemini_pro": ChatVertexAI(
+            model="gemini-1.5-pro",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
-            #convert_system_message_to_human=True
-        )
+            #project="gen-lang-client-0855960837",
+        ),
+        "claude-3-haiku-20240307": ChatAnthropic(
+            model="claude-3-haiku-20240307",
+            temperature=TEMPERATURE,
+            max_tokens=MAX_NEW_TOKENS,
+        ),    
+        "claude-3-sonnet-20240229": ChatAnthropic(
+            model="claude-3-sonnet-20240229",
+            temperature=TEMPERATURE,
+            max_tokens=MAX_NEW_TOKENS,
+        ),
+        "claude-3-opus-20240229": ChatAnthropic(
+            model="claude-3-opus-20240229",
+            temperature=TEMPERATURE,
+            max_tokens=MAX_NEW_TOKENS,
+        ),
     }
     llm = LLM_MODELS[model_type]
       
@@ -244,9 +270,7 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
     tools=[llm_math_tool, news_tool, weather_tool, arxiv_tool, wikipedia_tool, websearch_tool] # More tools could be added
     # Be careful with older tools, they might break with newer models
     
-    print(model_type)
-    
-    if model_type == "llama-3-70b-prompting":
+    if model_type.endswith("prompting"):
         prompt_react = hub.pull("hwchase17/react")
         agent = create_react_agent(llm, tools, prompt_react)
     else:
@@ -268,9 +292,10 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
 # +
 modelfamilies_model_dict = {
     "OpenAI GPT": ["gpt-4-turbo", "gpt-4o", "gpt-3.5-turbo"],
-    "Google Gemini": ["gemini-1.5-pro-latest", "gemini-1.5-flash-latest"],    
+    "Google Gemini": ["gemini-1.5-pro-latest", "gemini-1.5-flash-latest"],  
+    "Anthropic Claude": ["claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"],
     "MistralAI Mistral": ["mistral-large-latest", "open-mixtral-8x22b", "mistral-small-latest"],
-    "Meta Llama" : ["llama-3-70b-prompting", "Llama-2-70b-firefunction-v1"],
+    "Meta Llama" : ["Llama-2-70b-firefunction-v1", "llama-3-70b-prompting", "llama-v2-70b-prompting"],
 }
 
 def generate_system_prompt():
