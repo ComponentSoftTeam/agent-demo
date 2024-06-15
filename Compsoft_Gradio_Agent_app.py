@@ -38,7 +38,7 @@ News_api_key = os.environ["NEWS_API_KEY"]
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_anthropic import ChatAnthropic
-from langchain_google_vertexai import ChatVertexAI
+#from langchain_google_vertexai import ChatVertexAI
 from langchain_mistralai.chat_models import ChatMistralAI
 from langchain_fireworks.chat_models import ChatFireworks
 from langchain_core.output_parsers.string import StrOutputParser
@@ -50,7 +50,8 @@ from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_community.utilities.duckduckgo_search import DuckDuckGoSearchAPIWrapper
 
 from langchain.agents import create_tool_calling_agent, create_react_agent, AgentExecutor
-from langchain_community.agent_toolkits.load_tools import load_tools
+#from langchain_community.agent_toolkits.load_tools import load_tools
+from local_load_tools import load_tools
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.globals import set_debug, set_verbose
 from langchain_core.output_parsers.string import StrOutputParser
