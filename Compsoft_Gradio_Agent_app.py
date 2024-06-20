@@ -34,6 +34,8 @@ client = Client()
 
 News_api_key = os.environ["NEWS_API_KEY"]
 # Financial_news_api_key=os.environ["ALPHAVANTAGE_API_KEY"]
+Gradio_user = os.environ["GRADIO_USER"]
+Gradio_password = os.environ["GRADIO_PASSWORD"]
 
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -42,6 +44,9 @@ from langchain_anthropic import ChatAnthropic
 from langchain_mistralai.chat_models import ChatMistralAI
 from langchain_fireworks.chat_models import ChatFireworks
 from langchain_core.output_parsers.string import StrOutputParser
+
+# + active=""
+# !gcloud auth application-default login
 
 # +
 #from langchain.tools import WikipediaQueryRun
@@ -105,7 +110,7 @@ class VariableCallbackHandler(BaseCallbackHandler):
     ) -> Any:
         """Run on agent action."""
         action_log = action.log.strip("\n ")
-        new_text = f"REASONING: {action_log}\n"
+        new_text = f"EXECUTING: {action_log}\n"
         #message_log = str(action.message_log).strip("\n ")
         #new_text = f"REASONING: {action_log}\n{message_log}\n"
         trace_list_append(self._session_id,  f"\n{new_text}")
@@ -152,8 +157,8 @@ class VariableCallbackHandler(BaseCallbackHandler):
         end: str = "",
         **kwargs: Any,
     ) -> None:
-        newtext = f"{text}\n"
-        trace_list_append(self._session_id,  newtext)
+        #newtext = text.strip("\n ")
+        trace_list_append(self._session_id,  f"{text}\n")
 
     def on_agent_finish(
         self, finish: AgentFinish, color: Optional[str] = None, **kwargs: Any
@@ -174,17 +179,12 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
     MAX_NEW_TOKENS = 4000  
 
     LLM_MODELS = {
-        "llama-v2-70b-prompting": ChatFireworks(
-            model_name="accounts/fireworks/models/llama-v2-70b-chat",
-            temperature=TEMPERATURE,
-            max_tokens=MAX_NEW_TOKENS,            
-        ),
         "llama-3-70b-prompting": ChatFireworks(
             model_name="accounts/fireworks/models/llama-v3-70b-instruct",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,            
         ),    
-        "Llama-2-70b-firefunction-v1": ChatFireworks(
+        "Llama-3-70b-firefunction-v2": ChatFireworks(
             model_name="accounts/fireworks/models/firefunction-v1",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,            
@@ -204,7 +204,7 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),        
-        "mistral-large-latest": ChatMistralAI(
+        "mistral-large": ChatMistralAI(
             model="mistral-large-latest",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
@@ -214,34 +214,33 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
-        "mistral-small-latest": ChatMistralAI(
+        "mistral-small": ChatMistralAI(
             model="mistral-small-latest",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),        
-        "gemini-1.5-flash-latest": ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash-latest",
+        "gemini-1.5-flash": ChatGoogleGenerativeAI(
+            model="gemini-1.5-flash",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
-        "gemini-1.5-pro-latest": ChatGoogleGenerativeAI(
+        "gemini-1.5-pro": ChatGoogleGenerativeAI(
         #"gemini_pro": ChatVertexAI(
             model="gemini-1.5-pro",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
-            #project="gen-lang-client-0855960837",
         ),
-        "claude-3-haiku-20240307": ChatAnthropic(
+        "claude-3-haiku": ChatAnthropic(
             model="claude-3-haiku-20240307",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),    
-        "claude-3-sonnet-20240229": ChatAnthropic(
+        "claude-3-sonnet": ChatAnthropic(
             model="claude-3-sonnet-20240229",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
-        "claude-3-opus-20240229": ChatAnthropic(
+        "claude-3-opus": ChatAnthropic(
             model="claude-3-opus-20240229",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
@@ -293,10 +292,10 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
 # +
 modelfamilies_model_dict = {
     "OpenAI GPT": ["gpt-4-turbo", "gpt-4o", "gpt-3.5-turbo"],
-    "Google Gemini": ["gemini-1.5-pro-latest", "gemini-1.5-flash-latest"],  
-    "Anthropic Claude": ["claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"],
-    "MistralAI Mistral": ["mistral-large-latest", "open-mixtral-8x22b", "mistral-small-latest"],
-    "Meta Llama" : ["Llama-2-70b-firefunction-v1", "llama-3-70b-prompting", "llama-v2-70b-prompting"],
+    "Google Gemini": ["gemini-1.5-pro", "gemini-1.5-flash"],  
+    "Anthropic Claude": ["claude-3-opus", "claude-3-sonnet", "claude-3-haiku"],
+    "MistralAI Mistral": ["mistral-large", "open-mixtral-8x22b", "mistral-small"],
+    "Meta Llama" : ["Llama-3-70b-firefunction-v2", "llama-3-70b-prompting"],
 }
 
 def generate_system_prompt():
@@ -442,8 +441,10 @@ with gr.Blocks(title="CompSoft") as demo:
     )
 
 #demo.launch()
-demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=("CompSoft", "Bikszadi16"), max_threads=20, show_error=True, favicon_path="data/favicon.ico", state_session_capacity=20)
+demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=(Gradio_user, Gradio_password), max_threads=20, show_error=True, favicon_path="data/favicon.ico", state_session_capacity=20)
 # -
+
+
 
 
 
