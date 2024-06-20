@@ -25,9 +25,8 @@ load_dotenv()
 from langsmith import Client
 
 import os
-os.environ["LANGCHAIN_PROJECT"] = "Agents with Langchain"
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
-#os.environ["LANGCHAIN_TRACING_V2"] = "false"
+#os.environ["LANGCHAIN_PROJECT"] = "Agents with Langchain"
+#os.environ["LANGCHAIN_TRACING_V2"] = "true"
 
 client = Client()
 # -
@@ -54,13 +53,14 @@ from langchain_core.output_parsers.string import StrOutputParser
 from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_community.utilities.duckduckgo_search import DuckDuckGoSearchAPIWrapper
 
-from langchain.agents import create_tool_calling_agent, create_react_agent, AgentExecutor
+#from langchain.agents import create_tool_calling_agent, create_react_agent, AgentExecutor
+from langchain.agents import create_tool_calling_agent, create_react_agent
+from local_agent import AgentExecutor
 #from langchain_community.agent_toolkits.load_tools import load_tools
 from local_load_tools import load_tools
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.globals import set_debug, set_verbose
 from langchain_core.output_parsers.string import StrOutputParser
-
 from langchain import hub
 
 set_debug(False)
@@ -441,7 +441,8 @@ with gr.Blocks(title="CompSoft") as demo:
     )
 
 #demo.launch()
-demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=(Gradio_user, Gradio_password), max_threads=20, show_error=True, favicon_path="data/favicon.ico", state_session_capacity=20)
+demo.launch(share=True)
+#demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=(Gradio_user, Gradio_password), max_threads=20, show_error=True, favicon_path="data/favicon.ico", state_session_capacity=20)
 # -
 
 

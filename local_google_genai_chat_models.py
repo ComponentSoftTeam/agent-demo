@@ -92,7 +92,8 @@ from langchain_google_genai._function_utils import (
 from langchain_google_genai._image_utils import ImageBytesLoader
 from langchain_google_genai.llms import _BaseGoogleGenerativeAI
 
-from . import _genai_extension as genaix
+#from . import _genai_extension as genaix ###
+from langchain_google_genai import _genai_extension as genaix ###
 
 IMAGE_TYPES: Tuple = ()
 try:
@@ -694,7 +695,6 @@ def _response_to_result(
             generation_info["finish_reason"] = candidate.finish_reason.name
             for part in candidate.content.parts: ###
                 if part.function_call: ###
-                    print("part.function_call!!!")
                     generation_info["finish_reason"] = "tool_calls" ###
                     break ###
             
