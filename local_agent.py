@@ -1226,12 +1226,8 @@ class AgentExecutor(Chain):
             actions = [output]
         else:
             actions = output
-
-        text = "\nREASONING: Planning next steps:" ###
-        run_manager.on_text(text, verbose=self.verbose) ###
         for agent_action in actions:
-            text = agent_action.log.strip("\n ") ###
-            run_manager.on_text(f"{text}", verbose=self.verbose) ###
+            run_manager.on_agent_action(agent_action, color="blue") ###
             yield agent_action
         for agent_action in actions:
             yield self._perform_agent_action(
@@ -1263,10 +1259,7 @@ class AgentExecutor(Chain):
                 color=color,
                 callbacks=run_manager.get_child() if run_manager else None,
                 **tool_run_kwargs,
-            )
-            text = f"OBSERVATION: {observation}" ###
-            run_manager.on_text(text, verbose=self.verbose) ###
-            
+            )           
         else:
             tool_run_kwargs = self.agent.tool_run_logging_kwargs()
             observation = InvalidTool().run(
@@ -1370,11 +1363,8 @@ class AgentExecutor(Chain):
             actions = [output]
         else:
             actions = output
-        text = "\nREASONING: Planning next steps:" ###
-        run_manager.on_text(text, verbose=self.verbose) ###
         for agent_action in actions:
-            text = agent_action.log.strip("\n ") ###
-            run_manager.on_text(f"{text}", verbose=self.verbose) ###
+            run_manager.on_agent_action(agent_action, color="blue") ###
             yield agent_action
 
         # Use asyncio.gather to run multiple tool.arun() calls concurrently
@@ -1418,8 +1408,8 @@ class AgentExecutor(Chain):
                 callbacks=run_manager.get_child() if run_manager else None,
                 **tool_run_kwargs,
             )
-            text = f"OBSERVATION: {observation}" ###
-            run_manager.on_text(text, verbose=self.verbose) ###            
+            #text = f"OBSERVATION: {observation}" ###
+            #run_manager.on_text(text, verbose=self.verbose) ###            
         else:
             tool_run_kwargs = self.agent.tool_run_logging_kwargs()
             observation = await InvalidTool().arun(
