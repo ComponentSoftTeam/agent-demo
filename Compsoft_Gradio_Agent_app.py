@@ -66,8 +66,6 @@ set_debug(False)
 set_verbose(False)
 
 # +
-from __future__ import annotations
-
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from langchain_core.callbacks.base import BaseCallbackHandler
