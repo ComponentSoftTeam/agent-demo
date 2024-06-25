@@ -29,14 +29,21 @@ client = Client()
 
 News_api_key = os.environ["NEWS_API_KEY"]
 
-if os.environ["GRADIO_USER"]:
-    Gradio_user = os.environ["GRADIO_USER"]
-    Gradio_password = os.environ["GRADIO_PASSWORD"]
 
-# + active=""
-# if os.environ["GCP"]:
-#     !gcloud auth application-default login
-# -
+def check_var_in_env_file(var_name, env_file_path='.env'):
+    """Check if a variable exists in a .env file"""
+    var_exists = False
+    if os.path.exists(env_file_path):
+        with open(env_file_path, 'r') as f:
+            for line in f:
+                if line.startswith(var_name):
+                    var_exists = True
+                    break
+    return var_exists
+
+
+if check_var_in_env_file('GCP'):
+    # !gcloud auth application-default login
 
 from langchain_openai import ChatOpenAI
 #from langchain_google_genai import ChatGoogleGenerativeAI
@@ -210,7 +217,7 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),    
-        "claude-3-sonnet": ChatAnthropic(
+        "claude-3.5-sonnet": ChatAnthropic(
             model="claude-3-5-sonnet-20240620",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
@@ -261,7 +268,7 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
 modelfamilies_model_dict = {
     "OpenAI GPT": ["gpt-4-turbo", "gpt-4o", "gpt-3.5-turbo"],
     "Google Gemini": ["gemini-1.5-pro", "gemini-1.5-flash"],  
-    "Anthropic Claude": ["claude-3-opus", "claude-3-sonnet", "claude-3-haiku"],
+    "Anthropic Claude": ["claude-3-opus", "claude-3.5-sonnet", "claude-3-haiku"],
     "MistralAI Mistral": ["mistral-large", "open-mixtral-8x22b", "mistral-small"],
     "Meta Llama" : ["Llama-3-70b-firefunction-v2", "llama-3-70b-prompting"],
 }
@@ -304,9 +311,7 @@ def thoughts_func(session_id) -> str | None:
     return trace
 
 def exec_agent(chatbot, session_id: str, system_prompt ="", prompt="I have no request", model_type="mistral-large-latest"):
-    clear_texts(session_id)
-    text = f"PROMPT:  {prompt}"
-    trace_list_append(session_id, text)
+    trace_list.clear()
     chat = chatbot or []
     chat.append([prompt, ""])
     trace = ""    
@@ -321,8 +326,6 @@ def exec_agent_streaming(chatbot, system_prompt ="", prompt="I have no request",
     raise NotImplementedError()
     # global trace_list
     # trace_list.clear()
-    # text = f"PROMPT:  {prompt}"
-    # trace_list_append(session_id, text)
     # chat = chatbot or []
     # chat.append([prompt, ""])
     # trace = ""
@@ -390,8 +393,13 @@ with gr.Blocks(title="CompSoft") as demo:
         prompt
     )
 
-#demo.launch()
-demo.launch(share=True)
+if check_var_in_env_file('GRADIO_USER'):
+    Gradio_user = os.environ["GRADIO_USER"]
+    Gradio_password = os.environ["GRADIO_PASSWORD"]
+    demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=(Gradio_user, Gradio_password), max_threads=20, show_error=True, favicon_path="data/favicon.ico", state_session_capacity=20)
+else:
+    demo.launch()
+#demo.launch(share=True)
 #demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=(Gradio_user, Gradio_password), max_threads=20, show_error=True, favicon_path="data/favicon.ico", state_session_capacity=20)
 # -
 

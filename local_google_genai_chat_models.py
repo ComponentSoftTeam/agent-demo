@@ -134,8 +134,8 @@ def _create_retry_decorator() -> Callable[[Any], Any]:
     min_seconds = 1
     #max_seconds = 60
     max_seconds = 10 ###
-    max_retries = 10
-    #max_retries = 3 ###
+    #max_retries = 10
+    max_retries = 3 ###
 
     return retry(
         reraise=True,

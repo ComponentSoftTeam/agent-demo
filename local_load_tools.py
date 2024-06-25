@@ -179,7 +179,8 @@ DANGEROUS_TOOLS = {
 
 def _get_llm_math(llm: BaseLanguageModel) -> BaseTool:
     try:
-        from langchain.chains.llm_math.base import LLMMathChain
+        #from langchain.chains.llm_math.base import LLMMathChain ###
+        from  local_llm_math_base import LLMMathChain ###
     except ImportError:
         raise ImportError(
             "LLM Math tools require the library `langchain` to be installed."
