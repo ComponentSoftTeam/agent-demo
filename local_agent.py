@@ -1364,7 +1364,7 @@ class AgentExecutor(Chain):
         else:
             actions = output
         for agent_action in actions:
-            run_manager.on_agent_action(agent_action, color="blue") ###
+            await run_manager.on_agent_action(agent_action, color="blue") ###
             yield agent_action
 
         # Use asyncio.gather to run multiple tool.arun() calls concurrently

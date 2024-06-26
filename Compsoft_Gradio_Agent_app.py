@@ -202,13 +202,13 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
         ),        
         "gemini-1.5-flash": ChatGoogleGenerativeAI(
         #"gemini-1.5-flash": ChatVertexAI(            
-            model="gemini-1.5-flash",
+            model="gemini-1.5-flash-latest",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
         "gemini-1.5-pro": ChatGoogleGenerativeAI(
         #"gemini-1.5-pro": ChatVertexAI(
-            model="gemini-1.5-pro",
+            model="gemini-1.5-pro-latest",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
@@ -259,7 +259,7 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
 
     
     
-    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose = False, stream_runnable=False)
+    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose = False, return_intermediate_steps=False, stream_runnable=False)
     agent_chain = agent_executor | itemgetter("output")
     
     return agent_chain
@@ -314,13 +314,15 @@ def exec_agent(chatbot, session_id: str, system_prompt ="", prompt="I have no re
     trace_list.clear()
     chat = chatbot or []
     chat.append([prompt, ""])
-    trace = ""    
+    trace = "" 
+
+    yield chat, ""
     
     agent_chain = get_chain(session_id, model_type=model_type)
     response = agent_chain.invoke({"system_prompt": system_prompt, "input": prompt}, {"callbacks": [VariableCallbackHandler(session_id)]})
     chat[-1][1] = response
   
-    return chat, ""
+    yield chat, ""
 
 def exec_agent_streaming(chatbot, system_prompt ="", prompt="I have no request", model_type="mistral-large-latest"):
     raise NotImplementedError()

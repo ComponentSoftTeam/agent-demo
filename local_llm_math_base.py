@@ -143,7 +143,8 @@ class LLMMathChain(Chain):
         elif "Answer:" in llm_output:
             answer = "Answer: " + llm_output.split("Answer:")[-1]
         else:
-            raise ValueError(f"unknown format from LLM: {llm_output}")
+            #raise ValueError(f"unknown format from LLM: {llm_output}") ###
+            answer = "Answer: " + llm_output ###
         return {self.output_key: answer}
 
     def _call(
