@@ -43,7 +43,9 @@ def check_var_in_env_file(var_name, env_file_path='.env'):
 
 
 if check_var_in_env_file('GCP'):
-    # !gcloud auth application-default login
+    import subprocess
+    command = "gcloud auth application-default login"
+    subprocess.run(command, shell=True)
 
 from langchain_openai import ChatOpenAI
 #from langchain_google_genai import ChatGoogleGenerativeAI
@@ -311,18 +313,19 @@ def thoughts_func(session_id) -> str | None:
     return trace
 
 def exec_agent(chatbot, session_id: str, system_prompt ="", prompt="I have no request", model_type="mistral-large-latest"):
+    global trace_list
     trace_list.clear()
+    
+    trace_list_append(session_id,  f"PROMPT: {prompt}")
     chat = chatbot or []
     chat.append([prompt, ""])
     trace = "" 
-
-    yield chat, ""
     
     agent_chain = get_chain(session_id, model_type=model_type)
     response = agent_chain.invoke({"system_prompt": system_prompt, "input": prompt}, {"callbacks": [VariableCallbackHandler(session_id)]})
     chat[-1][1] = response
   
-    yield chat, ""
+    return chat, ""
 
 def exec_agent_streaming(chatbot, system_prompt ="", prompt="I have no request", model_type="mistral-large-latest"):
     raise NotImplementedError()
@@ -361,7 +364,7 @@ def generate_session_id():
 
 with gr.Blocks(title="CompSoft") as demo:
     session_id = gr.State(value=generate_session_id)
-    gr.Markdown("# Component Soft Agent Demo (Calculator, Websearch, Wikipedia, Arxiv, Weather, News)")
+    gr.Markdown("# Component Soft ReAct Agent Demo (Calculator, Websearch, Wikipedia, Arxiv, Weather, News)")
     system_prompt = gr.Textbox(label="System prompt", value=generate_system_prompt)
     with gr.Row():
         modelfamily = gr.Dropdown(list(modelfamilies_model_dict.keys()), label="Model family", value="OpenAI GPT")

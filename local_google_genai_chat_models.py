@@ -552,8 +552,8 @@ def _parse_chat_history(
                 # message.name can be null for ToolMessage
                 name: str = prev_message.tool_calls[0]["name"]
             else:
-                #name = message.name  # type: ignore
-                name = message.additional_kwargs["name"] ###
+                name = message.name  # type: ignore
+                #name = message.additional_kwargs["name"] ###
             tool_response: Any
             if not isinstance(message.content, str):
                 tool_response = message.content
