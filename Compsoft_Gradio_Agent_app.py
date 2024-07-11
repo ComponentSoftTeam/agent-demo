@@ -312,7 +312,7 @@ def thoughts_func(session_id) -> str | None:
 
     return trace
 
-def exec_agent(chatbot, session_id: str, system_prompt ="", prompt="I have no request", model_type="mistral-large-latest"):
+async def exec_agent(chatbot, session_id: str, system_prompt ="", prompt="I have no request", model_type="mistral-large-latest"):
     global trace_list
     trace_list.clear()
     
@@ -322,7 +322,7 @@ def exec_agent(chatbot, session_id: str, system_prompt ="", prompt="I have no re
     trace = "" 
     
     agent_chain = get_chain(session_id, model_type=model_type)
-    response = agent_chain.invoke({"system_prompt": system_prompt, "input": prompt}, {"callbacks": [VariableCallbackHandler(session_id)]})
+    response = await agent_chain.ainvoke({"system_prompt": system_prompt, "input": prompt}, {"callbacks": [VariableCallbackHandler(session_id)]})
     chat[-1][1] = response
   
     return chat, ""
