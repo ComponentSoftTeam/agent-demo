@@ -101,7 +101,8 @@ from langchain_core.callbacks import BaseCallbackManager
 from langchain_core.callbacks import Callbacks
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.tools import BaseTool, Tool
-#from local_tools import LocalTool
+
+# from local_tools import LocalTool
 
 
 def _get_tools_requests_get() -> BaseTool:
@@ -179,8 +180,8 @@ DANGEROUS_TOOLS = {
 
 def _get_llm_math(llm: BaseLanguageModel) -> BaseTool:
     try:
-        #from langchain.chains.llm_math.base import LLMMathChain ###
-        from  local_llm_math_base import LLMMathChain ###
+        # from langchain.chains.llm_math.base import LLMMathChain ###
+        from local_llm_math_base import LLMMathChain  ###
     except ImportError:
         raise ImportError(
             "LLM Math tools require the library `langchain` to be installed."
@@ -193,11 +194,14 @@ def _get_llm_math(llm: BaseLanguageModel) -> BaseTool:
         coroutine=LLMMathChain.from_llm(llm=llm).arun,
     )
 
-from datetime import datetime ###
+
+from datetime import datetime  ###
+
 
 def _get_open_meteo_api(llm: BaseLanguageModel) -> BaseTool:
-    import local_open_meteo_docs ###
+    import local_open_meteo_docs  ###
     from local_chains_api_base import APIChain  ###
+
     """try:
         #from langchain.chains.api.base import APIChain
         #from langchain.chains.api import (
@@ -213,10 +217,10 @@ def _get_open_meteo_api(llm: BaseLanguageModel) -> BaseTool:
         local_open_meteo_docs.OPEN_METEO_DOCS,
         limit_to_domains=["https://api.open-meteo.com/"],
     )
-    DATE = datetime.today().strftime('%Y-%m-%d') ###
+    DATE = datetime.today().strftime("%Y-%m-%d")  ###
     return Tool(
-        name="OpenMeteoAPI", ###
-        description=f"Useful for when you want to get weather information from the OpenMeteo API. The input should be a question in natural language that this Open-Meteo-API can answer. The current date is {DATE}", ###
+        name="OpenMeteoAPI",  ###
+        description=f"Useful for when you want to get weather information from the OpenMeteo API. The input should be a question in natural language that this Open-Meteo-API can answer. The current date is {DATE}",  ###
         func=chain.run,
     )
 
@@ -229,8 +233,9 @@ _LLM_TOOLS: Dict[str, Callable[[BaseLanguageModel], BaseTool]] = {
 
 def _get_news_api(llm: BaseLanguageModel, **kwargs: Any) -> BaseTool:
     news_api_key = kwargs["news_api_key"]
-    import local_news_docs ###
+    import local_news_docs  ###
     from local_chains_api_base import APIChain  ###
+
     """try:
         #from langchain.chains.api.base import APIChain
         #from langchain.chains.api import (
@@ -248,7 +253,7 @@ def _get_news_api(llm: BaseLanguageModel, **kwargs: Any) -> BaseTool:
         limit_to_domains=["https://newsapi.org/"],
     )
     return Tool(
-        name="NewsAPI", ###
+        name="NewsAPI",  ###
         description="Use this when you want to get information about the top headlines of current news stories. The input should be a question in natural language that this API can answer.",
         func=chain.run,
     )
@@ -325,11 +330,20 @@ def _get_merriam_webster(**kwargs: Any) -> BaseTool:
 
 
 def _get_wikipedia(**kwargs: Any) -> BaseTool:
-    return WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper(**kwargs))
+
+    return WikipediaQueryRun(
+        name="WikipediaQuery",
+        description="WikipediaQuery",
+        api_wrapper=WikipediaAPIWrapper(**kwargs),
+    )
 
 
 def _get_arxiv(**kwargs: Any) -> BaseTool:
-    return ArxivQueryRun(api_wrapper=ArxivAPIWrapper(**kwargs))
+    return ArxivQueryRun(
+        name="ArxivQuery",
+        description="ArxivQuery",
+        api_wrapper=ArxivAPIWrapper(**kwargs),
+    )
 
 
 def _get_golden_query(**kwargs: Any) -> BaseTool:
@@ -427,7 +441,11 @@ def _get_metaphor_search(**kwargs: Any) -> BaseTool:
 
 
 def _get_ddg_search(**kwargs: Any) -> BaseTool:
-    return DuckDuckGoSearchRun(api_wrapper=DuckDuckGoSearchAPIWrapper(**kwargs))
+    return DuckDuckGoSearchRun(
+        name="Websearch",
+        description="Websearch",
+        api_wrapper=DuckDuckGoSearchAPIWrapper(**kwargs),
+    )
 
 
 def _get_human_tool(**kwargs: Any) -> BaseTool:
@@ -734,6 +752,7 @@ def load_tools(
             tools.append(tool)
         else:
             raise ValueError(f"Got unknown tool {name}")
+    # print(tools) ###
     if callbacks is not None:
         for tool in tools:
             tool.callbacks = callbacks
