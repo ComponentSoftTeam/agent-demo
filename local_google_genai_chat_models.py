@@ -92,8 +92,8 @@ from langchain_google_genai._function_utils import (
 from langchain_google_genai._image_utils import ImageBytesLoader
 from langchain_google_genai.llms import _BaseGoogleGenerativeAI
 
-#from . import _genai_extension as genaix ###
-from langchain_google_genai import _genai_extension as genaix ###
+# from . import _genai_extension as genaix ###
+from langchain_google_genai import _genai_extension as genaix  ###
 
 IMAGE_TYPES: Tuple = ()
 try:
@@ -132,10 +132,10 @@ def _create_retry_decorator() -> Callable[[Any], Any]:
     """
     multiplier = 3
     min_seconds = 1
-    #max_seconds = 60
-    max_seconds = 10 ###
-    #max_retries = 10
-    max_retries = 3 ###
+    # max_seconds = 60
+    max_seconds = 10  ###
+    # max_retries = 10
+    max_retries = 3  ###
 
     return retry(
         reraise=True,
@@ -166,6 +166,7 @@ def _chat_with_retry(generation_method: Callable, **kwargs: Any) -> Any:
         Any: The result from the chat generation method.
     """
     retry_decorator = _create_retry_decorator()
+
     @retry_decorator
     def _chat_with_retry(**kwargs: Any) -> Any:
         try:
@@ -337,7 +338,7 @@ def _convert_to_parts(
     return parts
 
 
-def _parse_chat_history_gemini( ###
+def _parse_chat_history_gemini(  ###
     history: List[BaseMessage],
     project: Optional[str] = None,
     convert_system_message_to_human: Optional[bool] = False,
@@ -438,8 +439,8 @@ def _parse_chat_history_gemini( ###
         elif isinstance(message, ToolMessage):
             role = "function"
             # message.name can be null for ToolMessage
-            #name = message.name ###
-            name = message.additional_kwargs["name"] ###
+            # name = message.name ###
+            name = message.additional_kwargs["name"]  ###
             if name is None:
                 prev_message = history[i - 1] if i > 0 else None
                 if isinstance(prev_message, AIMessage):
@@ -481,12 +482,11 @@ def _parse_chat_history_gemini( ###
             raise ValueError(
                 f"Unexpected message with type {type(message)} at the position {i}."
             )
-    return system_instruction, vertex_messages ###
+    return system_instruction, vertex_messages  ###
 
 
 def _parse_chat_history(
-    input_messages: Sequence[BaseMessage], 
-    convert_system_message_to_human: bool = False
+    input_messages: Sequence[BaseMessage], convert_system_message_to_human: bool = False
 ) -> Tuple[Optional[Content], List[Content]]:
     messages: List[Content] = []
 
@@ -553,7 +553,7 @@ def _parse_chat_history(
                 name: str = prev_message.tool_calls[0]["name"]
             else:
                 name = message.name  # type: ignore
-                #name = message.additional_kwargs["name"] ###
+                # name = message.additional_kwargs["name"] ###
             tool_response: Any
             if not isinstance(message.content, str):
                 tool_response = message.content
@@ -610,8 +610,8 @@ def _parse_response_candidate(
 
         if part.function_call:
             # TODO: support multiple function calls
-            #if "function_call" in additional_kwargs: ###
-               #raise Exception("Multiple function calls are not currently supported") ###
+            # if "function_call" in additional_kwargs: ###
+            # raise Exception("Multiple function calls are not currently supported") ###
             function_call = {"name": part.function_call.name}
             # dump to match other function calling llm for now
             function_call_args_dict = proto.Message.to_dict(part.function_call)["args"]
@@ -635,7 +635,7 @@ def _parse_response_candidate(
                         [{"function": function_call}],
                         return_id=False,
                     )
-                    """tool_calls = [
+                    """tool_calls = [ ###
                         ToolCall(
                             name=tool_call["name"],
                             args=tool_call["args"],
@@ -652,7 +652,7 @@ def _parse_response_candidate(
                             )
                             for tool_call in tool_calls_dicts
                         ]
-                    )                    
+                    )  ###
                 except Exception as e:
                     invalid_tool_calls = [
                         InvalidToolCall(
@@ -664,7 +664,7 @@ def _parse_response_candidate(
                     ]
     if content is None:
         content = ""
-        
+
     if streaming:
         return AIMessageChunk(
             content=cast(Union[str, List[Union[str, Dict[Any, Any]]]], content),
@@ -693,11 +693,11 @@ def _response_to_result(
         generation_info = {}
         if candidate.finish_reason:
             generation_info["finish_reason"] = candidate.finish_reason.name
-            for part in candidate.content.parts: ###
-                if part.function_call: ###
-                    generation_info["finish_reason"] = "tool_calls" ###
-                    break ###
-            
+            for part in candidate.content.parts:  ###
+                if part.function_call:  ###
+                    generation_info["finish_reason"] = "tool_calls"  ###
+                    break  ###
+
         generation_info["safety_ratings"] = [
             proto.Message.to_dict(safety_rating, use_integers_for_enums=False)
             for safety_rating in candidate.safety_ratings
@@ -757,7 +757,7 @@ class ChatGoogleGenerativeAI(_BaseGoogleGenerativeAI, BaseChatModel):
         default_factory=list
     )  #: :meta private:
 
-    convert_system_message_to_human: bool = False 
+    convert_system_message_to_human: bool = False
     """Whether to merge any leading SystemMessage into the following HumanMessage.
     
     Gemini does not support system messages; any unsupported messages will 
@@ -878,7 +878,7 @@ class ChatGoogleGenerativeAI(_BaseGoogleGenerativeAI, BaseChatModel):
         generation_config: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> ChatResult:
-        #print(f"\nLANGCHAIN_REQUEST = {str(messages)}\n{str(tools)}\n{str(functions)}\n{str(generation_config)}\n{str(tool_config)}\n{str(generation_config)}\n") ###       
+        # print(f"\nLANGCHAIN_REQUEST = {str(messages)}\n{str(tools)}\n{str(functions)}\n{str(generation_config)}\n{str(tool_config)}\n{str(generation_config)}\n") ###
         request = self._prepare_request(
             messages,
             stop=stop,
@@ -887,15 +887,15 @@ class ChatGoogleGenerativeAI(_BaseGoogleGenerativeAI, BaseChatModel):
             safety_settings=safety_settings,
             tool_config=tool_config,
             generation_config=generation_config,
-        ) 
-        #print(f"\nGOOGLE_REQUEST = {str(request)}\n") ###     
+        )
+        # print(f"\nGOOGLE_REQUEST = {str(request)}\n") ###
         response: GenerateContentResponse = _chat_with_retry(
             request=request,
             **kwargs,
             generation_method=self.client.generate_content,
             metadata=self.default_metadata,
         )
-        #print(f"\nGOOGLE_RESPONSE = {str(response)}\n") ###
+        # print(f"\nGOOGLE_RESPONSE = {str(response)}\n") ###
         return _response_to_result(response)
 
     async def _agenerate(
@@ -1024,8 +1024,8 @@ class ChatGoogleGenerativeAI(_BaseGoogleGenerativeAI, BaseChatModel):
         elif functions:
             formatted_tools = [convert_to_genai_function_declarations(functions)]
 
-        #system_instruction, history = _parse_chat_history( ###
-        system_instruction, history = _parse_chat_history_gemini( ###
+        # system_instruction, history = _parse_chat_history( ###
+        system_instruction, history = _parse_chat_history_gemini(  ###
             messages,
             convert_system_message_to_human=self.convert_system_message_to_human,
         )

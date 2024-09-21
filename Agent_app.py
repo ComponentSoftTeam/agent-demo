@@ -60,7 +60,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 # from local_google_genai_chat_models import ChatGoogleGenerativeAI
 
 # from langchain_google_vertexai import ChatVertexAI
-from local_google_vertexai_chat_models import ChatVertexAI
+# from local_google_vertexai_chat_models import ChatVertexAI
 from langchain_anthropic import ChatAnthropic
 from langchain_mistralai.chat_models import ChatMistralAI
 from langchain_fireworks.chat_models import ChatFireworks
@@ -247,8 +247,7 @@ else:
 print("")
 # -
 
-exit()
-
+'''
 # agent_executor.invoke({"input": "How many people live in Budapest and Prague together?"})
 print(
     agent_chain.invoke(
@@ -325,3 +324,4 @@ Then include a line with each of the average of the maximum, minimum and avarage
         }
     )
 )
+'''

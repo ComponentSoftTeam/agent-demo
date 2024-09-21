@@ -86,13 +86,13 @@ exceptiongroup==1.2.2
     #   ipython
 executing==2.1.0
     # via stack-data
-fastapi==0.115.0
+fastapi==0.114.2
     # via gradio
 feedparser==6.0.11
     # via arxiv
 ffmpy==0.4.0
     # via gradio
-filelock==3.16.1
+filelock==3.16.0
     # via huggingface-hub
 fireworks-ai==0.15.3
     # via langchain-fireworks
@@ -364,7 +364,7 @@ pillow==10.4.0
     #   fireworks-ai
     #   gradio
     #   matplotlib
-platformdirs==4.3.6
+platformdirs==4.3.4
     # via jupyter-core
 primp==0.6.2
     # via duckduckgo-search
@@ -399,7 +399,7 @@ pyasn1==0.6.1
     #   rsa
 pyasn1-modules==0.4.1
     # via google-auth
-pydantic==2.9.2
+pydantic==2.8.2
     # via
     #   anthropic
     #   fastapi
@@ -411,7 +411,7 @@ pydantic==2.9.2
     #   langchain-core
     #   langsmith
     #   openai
-pydantic-core==2.23.4
+pydantic-core==2.20.1
     # via pydantic
 pydub==0.25.1
     # via gradio
