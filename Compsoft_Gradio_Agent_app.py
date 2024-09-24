@@ -20,17 +20,14 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 from langchain_openai import ChatOpenAI
-
-from langchain_google_genai import ChatGoogleGenerativeAI
-
-# from local_google_genai_chat_models import ChatGoogleGenerativeAI
-from langchain_google_vertexai import ChatVertexAI
-
-# from local_google_vertexai_chat_models import ChatVertexAI
-
 from langchain_anthropic import ChatAnthropic
 from langchain_mistralai.chat_models import ChatMistralAI
 from langchain_fireworks.chat_models import ChatFireworks
+
+# from langchain_google_genai import ChatGoogleGenerativeAI
+# from langchain_google_vertexai import ChatVertexAI
+from local_google_genai_chat_models import ChatGoogleGenerativeAI
+from local_google_vertexai_chat_models import ChatVertexAI
 
 from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_community.utilities.duckduckgo_search import DuckDuckGoSearchAPIWrapper
@@ -442,32 +439,31 @@ def main() -> None:
         # demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=(Gradio_user, Gradio_password), max_threads=20, show_error=True, favicon_path="data/favicon.ico", state_session_capacity=20)
 
 
+"""Global list variable which will be displayed in the Agent's thoughts Gradio frame."""
+trace_list: dict[str, list[str]] = {}
+
+load_dotenv(override=True)
+
+client = Client()
+set_debug(False)
+set_verbose(False)
+
+News_api_key = os.environ["NEWS_API_KEY"]
+
+modelfamilies_model_dict = {
+    "OpenAI GPT": ["gpt-4-turbo", "gpt-4o", "gpt-4o-mini"],
+    "Google Gemini": ["gemini-1.5-pro", "gemini-1.5-flash"],
+    "Anthropic Claude": ["claude-3-opus", "claude-3.5-sonnet", "claude-3-haiku"],
+    "MistralAI Mistral": ["mistral-large", "open-mixtral-8x22b", "mistral-small"],
+    "Meta Llama": ["Llama-v3.1-405b", "Llama-3.1-70b", "llama-3.1-8b"],
+}
+
+prompt_text = "What is the square root of 4?"
+# prompt = f"Create a table that contains the date as well as the maximum, minimum and average temperature values as well as the sum of precipitations in the coming 7 days in Budapest"
+# prompt = f"""Create a table that contains the date as well as the maximum, minimum and average temperature values as well as the sum of precipitations separately for each of the coming 7 days in Budapest.
+# Then include a line with each of the average of the maximum, minimum and avarage temperature values for these 7 days. And after all that also write a list with 10 current news in Budapest Hungary."""
+trace = ""
+
 # When running the app as the server, load the environment and run the main function
 if __name__ == "__main__":
-    load_dotenv(override=True)
-
-    """Global list variable which will be displayed in the Agent's thoughts Gradio frame."""
-    trace_list: dict[str, list[str]] = {}
-
-    client = Client()
-
-    set_debug(False)
-    set_verbose(False)
-
-    News_api_key = os.environ["NEWS_API_KEY"]
-
-    modelfamilies_model_dict = {
-        "OpenAI GPT": ["gpt-4-turbo", "gpt-4o", "gpt-4o-mini"],
-        "Google Gemini": ["gemini-1.5-pro", "gemini-1.5-flash"],
-        "Anthropic Claude": ["claude-3-opus", "claude-3.5-sonnet", "claude-3-haiku"],
-        "MistralAI Mistral": ["mistral-large", "open-mixtral-8x22b", "mistral-small"],
-        "Meta Llama": ["Llama-v3.1-405b", "Llama-3.1-70b", "llama-3.1-8b"],
-    }
-
-    prompt_text = "What is the square root of 4?"
-    # prompt = f"Create a table that contains the date as well as the maximum, minimum and average temperature values as well as the sum of precipitations in the coming 7 days in Budapest"
-    # prompt = f"""Create a table that contains the date as well as the maximum, minimum and average temperature values as well as the sum of precipitations separately for each of the coming 7 days in Budapest.
-    # Then include a line with each of the average of the maximum, minimum and avarage temperature values for these 7 days. And after all that also write a list with 10 current news in Budapest Hungary."""
-    trace = ""
-
     main()

@@ -254,7 +254,7 @@ def _get_news_api(llm: BaseLanguageModel, **kwargs: Any) -> BaseTool:
     )
     return Tool(
         name="NewsAPI",  ###
-        description="Use this when you want to get information about the top headlines of current news stories. The input should be a question in natural language that this API can answer.",
+        description="Use this when you want to get a list of current news stories about a given topic. The input should be a question in natural language that this API can answer.",
         func=chain.run,
     )
 

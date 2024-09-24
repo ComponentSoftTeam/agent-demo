@@ -1,10 +1,13 @@
 # flake8: noqa
 from langchain_core.prompts.prompt import PromptTemplate
 
-from datetime import datetime ###
-DATE = datetime.today().strftime('%Y-%m-%d') ###
+from datetime import datetime  ###
 
-API_URL_PROMPT_TEMPLATE = f"The current date is {DATE}. " + """You are given the below API Documentation:
+DATE = datetime.today().strftime("%Y-%m-%d")  ###
+
+API_URL_PROMPT_TEMPLATE = (
+    f"The current date is {DATE}. "
+    + """You are given the below API Documentation:
 {api_docs}
 
 Using this documentation, generate the full API url to call for answering the user question.
@@ -15,6 +18,7 @@ DON'T BE TALKATIVE JUST GENERATE THE FULL API URL WITHOUT ANY ADDITIONAL TEXT.
 
 Question: {question}
 API url: """
+)
 
 API_URL_PROMPT = PromptTemplate(
     input_variables=[
@@ -36,7 +40,7 @@ Here is the response from the API:
 
 #################################
 
-Summarize this response to answer the original question.
+Summarize this response to answer the original question even if the response doesn't seem to answer the question.
 
 Original question: {question}
 

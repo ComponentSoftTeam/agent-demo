@@ -1,22 +1,21 @@
 # flake8: noqa
 NEWS_DOCS = """API documentation:
 Endpoint: https://newsapi.org
-Everything /v2/everything
-Search through millions of articles from over 150,000 large and small news sources and blogs.
+Top headlines /v2/top-headlines
 
-This endpoint suits article discovery and analysis.
+This endpoint provides live top and breaking headlines for a country, specific category in a country, single source, or multiple sources. You can also search with keywords. Articles are sorted by the earliest date published first.
+
+IN CASE OF A QUESTION ABOUT NEWS IN A TOWN, CITY, COUNTY OR STATE, ALWAYS USE THE BELOW COUNTRY CODE OF THAT PLACE.
+
+This endpoint is great for retrieving headlines for use with news tickers or similar.
 
 #####################################################
 
 Request parameters:
 
-    q | string | Keywords or phrases to search for in the article title and body.
-    Advanced search is supported here:
-    Surround phrases with quotes (") for exact match.
-    Prepend words or phrases that must appear with a + symbol. Eg: +bitcoin
-    Prepend words that must not appear with a - symbol. Eg: -bitcoin
-    Alternatively you can use the AND / OR / NOT keywords, and optionally group these with parenthesis. Eg: crypto AND (ethereum OR litecoin) NOT bitcoin.
-    The complete value for q must be URL-encoded. Max length: 500 chars.
+    country | The 2-letter ISO 3166-1 code of the country you want to get headlines for. Possible options: ae ar at au be bg br ca ch cn co cu cz de eg fr gb gr hk hu id ie il in it jp kr lt lv ma mx my ng nl no nz ph pl pt ro rs ru sa se sg si sk th tr tw ua us ve za. Note: you can't mix this param with the sources param.
+    category | The category you want to get headlines for. Possible options: business entertainment general health science sports technology. Note: you can't mix this param with the sources param.
+    sources | A comma-separated string of identifiers for the news sources or blogs you want headlines from. Use the /top-headlines/sources endpoint to locate these programmatically or look at the sources index. Note: you can't mix this param with the country or category params.
 
     pageSize | int | The number of results to return per page (request). 20 is the default, 100 is the maximum.
     page | int | Use this to page through the results if the total results found is greater than the page size.
@@ -35,4 +34,6 @@ Response object:
     urlToImage | string | The URL to a relevant image for the article.
     publishedAt | string | The date and time that the article was published, in UTC (+000)
     content | string | The unformatted content of the article, where available. This is truncated to 200 chars.
+
 """
+
