@@ -249,7 +249,7 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
         websearch_tool,
     ]
 
-    if model_type.endswith("prompting"):
+    if model_type == "Llama-v3.1-405b":
         prompt_react = hub.pull("hwchase17/react")
         agent = create_react_agent(llm, tools, prompt_react)
     else:
@@ -451,9 +451,9 @@ set_verbose(False)
 News_api_key = os.environ["NEWS_API_KEY"]
 
 modelfamilies_model_dict = {
-    "OpenAI GPT": ["gpt-4-turbo", "gpt-4o", "gpt-4o-mini"],
+    "OpenAI GPT": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"],
     "Google Gemini": ["gemini-1.5-pro", "gemini-1.5-flash"],
-    "Anthropic Claude": ["claude-3-opus", "claude-3.5-sonnet", "claude-3-haiku"],
+    "Anthropic Claude": ["claude-3.5-sonnet", "claude-3-haiku", "claude-3-opus"],
     "MistralAI Mistral": ["mistral-large", "open-mixtral-8x22b", "mistral-small"],
     "Meta Llama": ["Llama-v3.1-405b", "Llama-3.1-70b", "llama-3.1-8b"],
 }

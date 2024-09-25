@@ -40,7 +40,7 @@ Here is the response from the API:
 
 #################################
 
-Summarize this response to answer the original question even if the response doesn't seem to answer the question.
+Summarize this response to answer the original question. Include all information even if some information doesn't seem to answer the question.
 
 Original question: {question}
 
