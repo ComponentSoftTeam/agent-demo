@@ -16,6 +16,23 @@ from local_chains_api_prompt import API_RESPONSE_PROMPT, API_URL_PROMPT
 from langchain.chains.base import Chain
 from langchain.chains.llm import LLMChain
 
+import re  ### starts here
+
+
+def extract_url(text):
+    """
+    Extracts the first URL starting with 'https' from the given text.
+
+    Args:
+        text (str): The input text containing the URL.
+
+    Returns:
+        str: The extracted URL or None if no URL is found.
+    """
+    pattern = r"https[^\s]+"
+    match = re.search(pattern, text)
+    return match.group() if match else None  ### ends here
+
 
 def _extract_scheme_and_domain(url: str) -> Tuple[str, str]:
     """Extract the scheme + domain from a given URL.
@@ -159,7 +176,8 @@ try:
                 callbacks=_run_manager.get_child(),
             )
             _run_manager.on_text(api_url, color="green", end="\n", verbose=self.verbose)
-            api_url = api_url.strip()
+            # api_url = api_url.strip() ###
+            api_url = extract_url(api_url)  ###
             if self.limit_to_domains and not _check_in_allowed_domain(
                 api_url, self.limit_to_domains
             ):
@@ -196,7 +214,8 @@ try:
             await _run_manager.on_text(
                 api_url, color="green", end="\n", verbose=self.verbose
             )
-            api_url = api_url.strip()
+            # api_url = api_url.strip() ###
+            api_url = extract_url(api_url)  ###
             if self.limit_to_domains and not _check_in_allowed_domain(
                 api_url, self.limit_to_domains
             ):
