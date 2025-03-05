@@ -443,8 +443,10 @@ def _get_metaphor_search(**kwargs: Any) -> BaseTool:
 def _get_ddg_search(**kwargs: Any) -> BaseTool:
     return DuckDuckGoSearchRun(
         name="Websearch",
-        description="Websearch",
-        api_wrapper=DuckDuckGoSearchAPIWrapper(**kwargs),
+        # description="Websearch",
+        api_wrapper=DuckDuckGoSearchAPIWrapper(
+            backend="html", region="hu-hu", **kwargs
+        )  ###        
     )
 
 
