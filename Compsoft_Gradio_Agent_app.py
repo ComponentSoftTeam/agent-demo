@@ -24,15 +24,15 @@ from langchain_anthropic import ChatAnthropic
 from langchain_mistralai.chat_models import ChatMistralAI
 from langchain_fireworks.chat_models import ChatFireworks
 
-# from langchain_google_genai import ChatGoogleGenerativeAI
-# from langchain_google_vertexai import ChatVertexAI
-from local_google_genai_chat_models import ChatGoogleGenerativeAI
-from local_google_vertexai_chat_models import ChatVertexAI
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_vertexai import ChatVertexAI
+#from local_google_genai_chat_models import ChatGoogleGenerativeAI
+#from local_google_vertexai_chat_models import ChatVertexAI
 
 from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_community.utilities.duckduckgo_search import DuckDuckGoSearchAPIWrapper
 
-# from langchain.agents import create_tool_calling_agent, create_react_agent, AgentExecutor
+#from langchain.agents import create_tool_calling_agent, create_react_agent, AgentExecutor
 from langchain.agents import create_tool_calling_agent, create_react_agent
 from local_agent import AgentExecutor
 
@@ -378,7 +378,7 @@ def main() -> None:
                 max_lines=13,
             )
             chatbot = gr.Chatbot(
-                label="Agent's answer", height=325, show_copy_button=True, scale=2
+                label="Agent's answer", height=325, show_copy_button=True, scale=2, type='tuples'
             )
         with gr.Row():
             prompt = gr.Textbox(label="Prompt", value=prompt_text)
@@ -386,7 +386,9 @@ def main() -> None:
             submit_btn_nostreaming = gr.Button("Answer")
             clear_btn = gr.ClearButton([prompt, chatbot, thoughts])
 
-        rep = demo.load(thoughts_func, inputs=[session_id], outputs=thoughts, every=1)
+        # Create a timer that updates thoughts every 1 second
+        timer = gr.Timer(1, active=True)
+        timer.tick(thoughts_func, inputs=[session_id], outputs=thoughts)
 
         @modelfamily.change(inputs=modelfamily, outputs=[model_type])
         def update_modelfamily(modelfamily):
@@ -424,19 +426,19 @@ def main() -> None:
         Gradio_user = os.environ["GRADIO_USER"]
         Gradio_password = os.environ["GRADIO_PASSWORD"]
         demo.launch(
-            share=True,
-            share_server_address="gradio.componentsoft.ai:7000",
-            share_server_protocol="https",
-            auth=(Gradio_user, Gradio_password),
-            max_threads=20,
+            #share=True,
+            #share_server_address="gradio.componentsoft.ai:7000",
+            #share_server_protocol="https",
+            #auth=(Gradio_user, Gradio_password),
+            #max_threads=20,
             show_error=True,
             favicon_path="data/favicon.ico",
-            state_session_capacity=20,
+            #state_session_capacity=20,
         )
     else:
-        demo.launch()
-        # demo.launch(share=True)
-        # demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=(Gradio_user, Gradio_password), max_threads=20, show_error=True, favicon_path="data/favicon.ico", state_session_capacity=20)
+        #demo.launch()
+        #demo.launch(share=True)
+        demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=(Gradio_user, Gradio_password), max_threads=20, show_error=True, favicon_path="data/favicon.ico", state_session_capacity=20)
 
 
 """Global list variable which will be displayed in the Agent's thoughts Gradio frame."""

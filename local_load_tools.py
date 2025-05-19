@@ -14,6 +14,7 @@ whether permissions of the given toolkit are appropriate for the application.
 
 See [Security](https://python.langchain.com/docs/security) for more information.
 """
+
 import warnings
 from typing import Any, Dict, List, Optional, Callable, Tuple
 
@@ -102,8 +103,6 @@ from langchain_core.callbacks import Callbacks
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.tools import BaseTool, Tool
 
-# from local_tools import LocalTool
-
 
 def _get_tools_requests_get() -> BaseTool:
     # Dangerous requests are allowed here, because there's another flag that the user
@@ -179,14 +178,15 @@ DANGEROUS_TOOLS = {
 
 
 def _get_llm_math(llm: BaseLanguageModel) -> BaseTool:
-    try:
-        # from langchain.chains.llm_math.base import LLMMathChain ###
-        from local_llm_math_base import LLMMathChain  ###
+    from local_llm_math_base import LLMMathChain  ###
+
+    """try:
+        from langchain.chains.llm_math.base import LLMMathChain ###
     except ImportError:
         raise ImportError(
             "LLM Math tools require the library `langchain` to be installed."
             " Please install it with `pip install langchain`."
-        )
+        )"""
     return Tool(
         name="Calculator",
         description="Useful for when you need to answer questions about math.",
@@ -199,14 +199,14 @@ from datetime import datetime  ###
 
 
 def _get_open_meteo_api(llm: BaseLanguageModel) -> BaseTool:
-    import local_open_meteo_docs  ###
     from local_chains_api_base import APIChain  ###
+    import local_open_meteo_docs  ###
 
     """try:
-        #from langchain.chains.api.base import APIChain
-        #from langchain.chains.api import (
-        #    open_meteo_docs,
-        #)
+        from langchain.chains.api.base import APIChain
+        from langchain.chains.api import (
+            open_meteo_docs,
+        )
     except ImportError:
         raise ImportError(
             "API tools require the library `langchain` to be installed."
@@ -214,7 +214,8 @@ def _get_open_meteo_api(llm: BaseLanguageModel) -> BaseTool:
         )"""
     chain = APIChain.from_llm_and_api_docs(
         llm,
-        local_open_meteo_docs.OPEN_METEO_DOCS,
+        local_open_meteo_docs.OPEN_METEO_DOCS,  ###
+        # open_meteo_docs.OPEN_METEO_DOCS,  ###
         limit_to_domains=["https://api.open-meteo.com/"],
     )
     DATE = datetime.today().strftime("%Y-%m-%d")  ###
@@ -233,14 +234,14 @@ _LLM_TOOLS: Dict[str, Callable[[BaseLanguageModel], BaseTool]] = {
 
 def _get_news_api(llm: BaseLanguageModel, **kwargs: Any) -> BaseTool:
     news_api_key = kwargs["news_api_key"]
-    import local_news_docs  ###
     from local_chains_api_base import APIChain  ###
+    import local_news_docs  ###
 
     """try:
-        #from langchain.chains.api.base import APIChain
-        #from langchain.chains.api import (
-        #    news_docs,
-        #)
+        from langchain.chains.api.base import APIChain
+        from langchain.chains.api import (
+            news_docs,
+        )
     except ImportError:
         raise ImportError(
             "API tools require the library `langchain` to be installed."
@@ -248,13 +249,14 @@ def _get_news_api(llm: BaseLanguageModel, **kwargs: Any) -> BaseTool:
         )"""
     chain = APIChain.from_llm_and_api_docs(
         llm,
-        local_news_docs.NEWS_DOCS,
+        local_news_docs.NEWS_DOCS,  ###
         headers={"X-Api-Key": news_api_key},
-        limit_to_domains=["https://newsapi.org/"],
+        limit_to_domains=["https://newsapi.org//v2/everything"],
     )
+    DATE = datetime.today().strftime("%Y-%m-%d")  ###
     return Tool(
         name="NewsAPI",  ###
-        description="Use this when you want to get a list of current news stories about a given topic or in a specific location. The input should be a question in natural language that this API can answer.",
+        description=f"Use this when you want to get a list of current news stories about a given topic. The input should be a question in natural language that this API can answer.  The current date is {DATE}",
         func=chain.run,
     )
 
@@ -330,20 +332,11 @@ def _get_merriam_webster(**kwargs: Any) -> BaseTool:
 
 
 def _get_wikipedia(**kwargs: Any) -> BaseTool:
-
-    return WikipediaQueryRun(
-        name="WikipediaQuery",
-        description="WikipediaQuery",
-        api_wrapper=WikipediaAPIWrapper(**kwargs),
-    )
+    return WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper(**kwargs))
 
 
 def _get_arxiv(**kwargs: Any) -> BaseTool:
-    return ArxivQueryRun(
-        name="ArxivQuery",
-        description="ArxivQuery",
-        api_wrapper=ArxivAPIWrapper(**kwargs),
-    )
+    return ArxivQueryRun(api_wrapper=ArxivAPIWrapper(**kwargs))
 
 
 def _get_golden_query(**kwargs: Any) -> BaseTool:
@@ -441,12 +434,35 @@ def _get_metaphor_search(**kwargs: Any) -> BaseTool:
 
 
 def _get_ddg_search(**kwargs: Any) -> BaseTool:
-    return DuckDuckGoSearchRun(
-        name="Websearch",
+    from pydantic import BaseModel, Field, model_validator
+    from typing import Optional
+    
+    # Create a custom schema that accepts both 'query' and 'search query'
+    class CustomDDGInput(BaseModel):
+        query: Optional[str] = Field(None, description="search query to look up")
+        search_query: Optional[str] = Field(None, alias="search query", description="alternative name for search query")
+        
+        @model_validator(mode='after')
+        def validate_query(self):
+            # If query is not provided but search_query is, use search_query as query
+            if self.query is None and self.search_query is not None:
+                self.query = self.search_query
+            # Ensure we have a query one way or another
+            if self.query is None:
+                raise ValueError("Either 'query' or 'search query' must be provided")
+            return self
+    
+    # Create the DuckDuckGo search tool with our custom schema
+    ddg_tool = DuckDuckGoSearchRun(
         api_wrapper=DuckDuckGoSearchAPIWrapper(
             backend="html", region="hu-hu", **kwargs
-        )  ###        
+        )
     )
+    
+    # Replace the schema with our custom one
+    ddg_tool.args_schema = CustomDDGInput
+    
+    return ddg_tool
 
 
 def _get_human_tool(**kwargs: Any) -> BaseTool:
@@ -612,13 +628,17 @@ def load_huggingface_tool(
 
     Args:
         task_or_repo_id: Task or model repo id.
-        model_repo_id: Optional model repo id.
-        token: Optional token.
+        model_repo_id: Optional model repo id. Defaults to None.
+        token: Optional token. Defaults to None.
         remote: Optional remote. Defaults to False.
-        **kwargs:
+        kwargs: Additional keyword arguments.
 
     Returns:
         A tool.
+
+    Raises:
+        ImportError: If the required libraries are not installed.
+        NotImplementedError: If multimodal outputs or inputs are not supported.
     """
     try:
         from transformers import load_tool
@@ -644,6 +664,25 @@ def load_huggingface_tool(
         raise NotImplementedError("Multimodal inputs not supported yet.")
     return Tool.from_function(
         hf_tool.__call__, name=hf_tool.name, description=hf_tool.description
+    )
+
+
+def raise_dangerous_tools_exception(name: str) -> None:
+    raise ValueError(
+        f"{name} is a dangerous tool. You cannot use it without opting in "
+        "by setting allow_dangerous_tools to True. "
+        "Most tools have some inherit risk to them merely because they are "
+        'allowed to interact with the "real world".'
+        "Please refer to LangChain security guidelines "
+        "to https://python.langchain.com/docs/security."
+        "Some tools have been designated as dangerous because they pose "
+        "risk that is not intuitively obvious. For example, a tool that "
+        "allows an agent to make requests to the web, can also be used "
+        "to make requests to a server that is only accessible from the "
+        "server hosting the code."
+        "Again, all tools carry some risk, and it's your responsibility to "
+        "understand which tools you're using and the risks associated with "
+        "them."
     )
 
 
@@ -674,7 +713,8 @@ def load_tools(
 
     Args:
         tool_names: name of tools to load.
-        llm: An optional language model, may be needed to initialize certain tools.
+        llm: An optional language model may be needed to initialize certain tools.
+            Defaults to None.
         callbacks: Optional callback manager or list of callback handlers.
             If not provided, default global callback manager will be used.
         allow_dangerous_tools: Optional flag to allow dangerous tools.
@@ -686,9 +726,17 @@ def load_tools(
             Please note that this list may not be fully exhaustive.
             It is your responsibility to understand which tools
             you're using and the risks associated with them.
+            Defaults to False.
+        kwargs: Additional keyword arguments.
 
     Returns:
         List of tools.
+
+    Raises:
+        ValueError: If the tool name is unknown.
+        ValueError: If the tool requires an LLM to be provided.
+        ValueError: If the tool requires some parameters that were not provided.
+        ValueError: If the tool is a dangerous tool and allow_dangerous_tools is False.
     """
     tools = []
     callbacks = _handle_callbacks(
@@ -696,22 +744,7 @@ def load_tools(
     )
     for name in tool_names:
         if name in DANGEROUS_TOOLS and not allow_dangerous_tools:
-            raise ValueError(
-                f"{name} is a dangerous tool. You cannot use it without opting in "
-                "by setting allow_dangerous_tools to True. "
-                "Most tools have some inherit risk to them merely because they are "
-                'allowed to interact with the "real world".'
-                "Please refer to LangChain security guidelines "
-                "to https://python.langchain.com/docs/security."
-                "Some tools have been designated as dangerous because they pose "
-                "risk that is not intuitively obvious. For example, a tool that "
-                "allows an agent to make requests to the web, can also be used "
-                "to make requests to a server that is only accessible from the "
-                "server hosting the code."
-                "Again, all tools carry some risk, and it's your responsibility to "
-                "understand which tools you're using and the risks associated with "
-                "them."
-            )
+            raise_dangerous_tools_exception(name)
 
         if name in {"requests"}:
             warnings.warn(
@@ -720,8 +753,10 @@ def load_tools(
             )
         if name == "requests_all":
             # expand requests into various methods
+            if not allow_dangerous_tools:
+                raise_dangerous_tools_exception(name)
             requests_method_tools = [
-                _tool for _tool in _BASE_TOOLS if _tool.startswith("requests_")
+                _tool for _tool in DANGEROUS_TOOLS if _tool.startswith("requests_")
             ]
             tool_names.extend(requests_method_tools)
         elif name in _BASE_TOOLS:
@@ -753,7 +788,6 @@ def load_tools(
             tools.append(tool)
         else:
             raise ValueError(f"Got unknown tool {name}")
-    # print(tools) ###
     if callbacks is not None:
         for tool in tools:
             tool.callbacks = callbacks

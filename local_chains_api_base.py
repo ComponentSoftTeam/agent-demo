@@ -1,4 +1,5 @@
 """Chain that makes API calls and summarizes the responses to answer a question."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Sequence, Tuple
@@ -10,7 +11,8 @@ from langchain_core.callbacks import (
 )
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import BasePromptTemplate
-from langchain_core.pydantic_v1 import Field, root_validator
+#from langchain_core.pydantic_v1 import Field, root_validator ###
+from pydantic import Field, model_validator ###
 
 from local_chains_api_prompt import API_RESPONSE_PROMPT, API_URL_PROMPT
 from langchain.chains.base import Chain
@@ -31,6 +33,7 @@ def extract_url(text):
     """
     pattern = r"https[^\s]+"
     match = re.search(pattern, text)
+
     return match.group() if match else None  ### ends here
 
 
@@ -123,7 +126,7 @@ try:
             """
             return [self.output_key]
 
-        @root_validator(pre=True)
+        @model_validator(mode='before')
         def validate_api_request_prompt(cls, values: Dict) -> Dict:
             """Check that api request prompt expects the right variables."""
             input_vars = values["api_request_chain"].prompt.input_variables
@@ -134,7 +137,7 @@ try:
                 )
             return values
 
-        @root_validator(pre=True)
+        @model_validator(mode='before')
         def validate_limit_to_domains(cls, values: Dict) -> Dict:
             """Check that allowed domains are valid."""
             if "limit_to_domains" not in values:
@@ -152,7 +155,7 @@ try:
                 )
             return values
 
-        @root_validator(pre=True)
+        @model_validator(mode='before')
         def validate_api_answer_prompt(cls, values: Dict) -> Dict:
             """Check that api answer prompt expects the right variables."""
             input_vars = values["api_answer_chain"].prompt.input_variables
@@ -262,6 +265,7 @@ try:
         @property
         def _chain_type(self) -> str:
             return "api_chain"
+
 except ImportError:
 
     class APIChain:  # type: ignore[no-redef]
