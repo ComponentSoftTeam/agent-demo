@@ -249,7 +249,7 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
         websearch_tool,
     ]
 
-    if model_type == "Llama-v3.1-405b":
+    """if model_type == "Llama-v3.1-405b":
         prompt_react = hub.pull("hwchase17/react")
         agent = create_react_agent(llm, tools, prompt_react)
     else:
@@ -261,7 +261,17 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
                 ("placeholder", "{agent_scratchpad}"),
             ]
         )
-        agent = create_tool_calling_agent(llm, tools, prompt)
+        agent = create_tool_calling_agent(llm, tools, prompt)"""
+
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", "{system_prompt}"),
+            ("placeholder", "{chat_history}"),
+            ("human", "{input}"),
+            ("placeholder", "{agent_scratchpad}"),
+        ]
+    )
+    agent = create_tool_calling_agent(llm, tools, prompt)
 
     agent_executor = AgentExecutor(
         agent=agent,
@@ -378,7 +388,7 @@ def main() -> None:
                 max_lines=13,
             )
             chatbot = gr.Chatbot(
-                label="Agent's answer", height=325, show_copy_button=True, scale=2, type='tuples'
+                label="Agent's answer", height=325, show_copy_button=True, scale=2, type='messages'
             )
         with gr.Row():
             prompt = gr.Textbox(label="Prompt", value=prompt_text)
@@ -445,6 +455,9 @@ def main() -> None:
 trace_list: dict[str, list[str]] = {}
 
 load_dotenv(override=True)
+
+os.environ["LANGSMITH_TRACING_V2"] = "true" # Set to true if you want to enable Langsmith tracing
+os.environ["LANGSMITH_PROJECT"] = "Compsoft Gradio Agent" # Set an identifier for your project
 
 client = Client()
 set_debug(False)
