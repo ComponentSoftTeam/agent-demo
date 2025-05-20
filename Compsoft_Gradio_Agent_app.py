@@ -69,11 +69,11 @@ def check_var_in_env_file(var_name, env_file_path=".env"):
     return var_exists
 
 
-if check_var_in_env_file("GCP"):
+"""if check_var_in_env_file("GCP"):
     import subprocess
 
     command = "gcloud auth application-default login"
-    subprocess.run(command, shell=True)
+    subprocess.run(command, shell=True)"""
 
 
 def trace_list_append(session_id: str, text: str) -> None:
@@ -388,7 +388,7 @@ def main() -> None:
                 max_lines=13,
             )
             chatbot = gr.Chatbot(
-                label="Agent's answer", height=325, show_copy_button=True, scale=2, type='messages'
+                label="Agent's answer", height=325, show_copy_button=True, scale=2, type='tuples'
             )
         with gr.Row():
             prompt = gr.Textbox(label="Prompt", value=prompt_text)
@@ -436,14 +436,14 @@ def main() -> None:
         Gradio_user = os.environ["GRADIO_USER"]
         Gradio_password = os.environ["GRADIO_PASSWORD"]
         demo.launch(
-            #share=True,
-            #share_server_address="gradio.componentsoft.ai:7000",
-            #share_server_protocol="https",
-            #auth=(Gradio_user, Gradio_password),
-            #max_threads=20,
+            share=True,
+            share_server_address="gradio.componentsoft.ai:7000",
+            share_server_protocol="https",
+            auth=(Gradio_user, Gradio_password),
+            max_threads=20,
             show_error=True,
             favicon_path="data/favicon.ico",
-            #state_session_capacity=20,
+            state_session_capacity=20,
         )
     else:
         #demo.launch()
