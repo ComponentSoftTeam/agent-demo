@@ -69,11 +69,11 @@ def check_var_in_env_file(var_name, env_file_path=".env"):
     return var_exists
 
 
-"""if check_var_in_env_file("GCP"):
+if check_var_in_env_file("GCP"):
     import subprocess
 
     command = "gcloud auth application-default login"
-    subprocess.run(command, shell=True)"""
+    subprocess.run(command, shell=True)
 
 
 def trace_list_append(session_id: str, text: str) -> None:
@@ -138,20 +138,15 @@ class VariableCallbackHandler(BaseCallbackHandler):
 def get_chain(session_id: str, model_type="mistral-large-latest"):
 
     TEMPERATURE = 0.0
-    MAX_NEW_TOKENS = 4000
+    MAX_NEW_TOKENS = 10000
 
     LLM_MODELS = {
-        "Llama-v3.1-405b": ChatFireworks(
-            model_name="accounts/fireworks/models/llama-v3p1-405b-instruct",
+        "Llama-3.3-70b": ChatFireworks(
+            model_name="accounts/fireworks/models/llama-v3p3-70b-instruct",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
-        "Llama-3.1-70b": ChatFireworks(
-            model_name="accounts/fireworks/models/llama-v3p1-70b-instruct",
-            temperature=TEMPERATURE,
-            max_tokens=MAX_NEW_TOKENS,
-        ),
-        "llama-3.1-8b": ChatFireworks(
+        "Llama-3.1-8b": ChatFireworks(
             model_name="accounts/fireworks/models/llama-v3p1-8b-instruct",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
@@ -166,8 +161,13 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
-        "gpt-4-turbo": ChatOpenAI(
-            model="gpt-4-turbo",
+        "gpt-4.1": ChatOpenAI(
+            model="gpt-4.1",
+            temperature=TEMPERATURE,
+            max_tokens=MAX_NEW_TOKENS,
+        ),
+        "gpt-4.1-mini": ChatOpenAI(
+            model="gpt-4.1-mini",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
@@ -176,8 +176,8 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
-        "open-mixtral-8x22b": ChatMistralAI(
-            model="open-mixtral-8x22b",
+        "mistral-medium": ChatMistralAI(
+            model="mistral-medium-latest",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
@@ -186,30 +186,30 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
-        "gemini-1.5-flash": ChatGoogleGenerativeAI(
-            # "gemini-1.5-flash": ChatVertexAI(
-            model="gemini-1.5-flash-latest",
+        "gemini-2.0-flash": ChatGoogleGenerativeAI(
+            # "gemini-2.0-flash": ChatVertexAI(
+            model="gemini-2.0-flash",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
-        "gemini-1.5-pro": ChatGoogleGenerativeAI(
-            # "gemini-1.5-pro": ChatVertexAI(
-            model="gemini-1.5-pro-latest",
+        "gemini-2.5-pro": ChatGoogleGenerativeAI(
+            # "gemini-2.5": ChatVertexAI(
+            model="gemini-2.5-pro-preview-05-06",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
-        "claude-3-haiku": ChatAnthropic(
-            model="claude-3-haiku-20240307",
+        "claude-3.7-sonnet": ChatAnthropic(
+            model="claude-3-7-sonnet-20250219",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
         "claude-3.5-sonnet": ChatAnthropic(
-            model="claude-3-5-sonnet-20240620",
+            model="claude-3-5-sonnet-20241022",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
-        "claude-3-opus": ChatAnthropic(
-            model="claude-3-opus-20240229",
+        "claude-3-haiku": ChatAnthropic(
+            model="claude-3-haiku-20241022",
             temperature=TEMPERATURE,
             max_tokens=MAX_NEW_TOKENS,
         ),
@@ -446,18 +446,17 @@ def main() -> None:
             state_session_capacity=20,
         )
     else:
-        #demo.launch()
+        demo.launch()
         #demo.launch(share=True)
-        demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=(Gradio_user, Gradio_password), max_threads=20, show_error=True, favicon_path="data/favicon.ico", state_session_capacity=20)
+        #demo.launch(share=True, share_server_address="gradio.componentsoft.ai:7000", share_server_protocol="https", auth=(Gradio_user, Gradio_password), max_threads=20, show_error=True, favicon_path="data/favicon.ico", state_session_capacity=20)
 
 
 """Global list variable which will be displayed in the Agent's thoughts Gradio frame."""
 trace_list: dict[str, list[str]] = {}
 
 load_dotenv(override=True)
-
 os.environ["LANGSMITH_TRACING_V2"] = "true" # Set to true if you want to enable Langsmith tracing
-os.environ["LANGSMITH_PROJECT"] = "Compsoft Gradio Agent" # Set an identifier for your project
+os.environ["LANGSMITH_PROJECT"] = "CompSoft Agent 2.0 demo" # Set an identifier for your project
 
 client = Client()
 set_debug(False)
@@ -466,11 +465,11 @@ set_verbose(False)
 News_api_key = os.environ["NEWS_API_KEY"]
 
 modelfamilies_model_dict = {
-    "OpenAI GPT": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"],
-    "Google Gemini": ["gemini-1.5-pro", "gemini-1.5-flash"],
-    "Anthropic Claude": ["claude-3.5-sonnet", "claude-3-haiku", "claude-3-opus"],
-    "MistralAI Mistral": ["mistral-large", "open-mixtral-8x22b", "mistral-small"],
-    "Meta Llama": ["Llama-v3.1-405b", "Llama-3.1-70b", "llama-3.1-8b"],
+    "OpenAI GPT": ["gpt-4o", "gpt-4o-mini", "gpt-4.1", "gpt-4.1-mini"],
+    "Google Gemini": ["gemini-2.5-pro", "gemini-2.0-flash"],
+    "Anthropic Claude": ["claude-3.7-sonnet", "claude-3.5-sonnet", "claude-3-haiku"],
+    "MistralAI Mistral": ["mistral-large", "mistral-medium", "mistral-small"],
+    "Meta Llama": ["Llama-3.3-70b", "Llama-3.1-8b"],
 }
 
 prompt_text = "What is the square root of 4?"
