@@ -138,7 +138,7 @@ class VariableCallbackHandler(BaseCallbackHandler):
 def get_chain(session_id: str, model_type="mistral-large-latest"):
 
     TEMPERATURE = 0.0
-    MAX_NEW_TOKENS = 10000
+    MAX_NEW_TOKENS = 11000
 
     LLM_MODELS = {
         "Llama-3.3-70b": ChatFireworks(
