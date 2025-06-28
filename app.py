@@ -38,6 +38,7 @@ from local_agent import AgentExecutor
 
 # from langchain_community.agent_toolkits.load_tools import load_tools
 from local_load_tools import load_tools
+from langchain_tavily import TavilySearch
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.globals import set_debug, set_verbose
 from langchain_core.output_parsers.string import StrOutputParser
@@ -119,13 +120,20 @@ class VariableCallbackHandler(BaseCallbackHandler):
         llm_prefix: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
-        """If not the final action, print out observation."""
-        output = output.strip("\n ")
-        # if observation_prefix is not None:
-        #    trace_list_append(self._session_id,  f"\nobservation_prefix = {observation_prefix}\n")
+        # If not the final action, print out observation.
+        # If tavily_search tool was used, append the tavily_search results to the trace     
+        if "name" in kwargs and kwargs["name"] == "tavily_search":
+            output = output["results"] ###
+            if isinstance(output, list): ###
+                #output = "\n\n".join(["title: " + str(x["title"]) + "\ncontent: " + str(x["content"]) for x in output]) ###
+                output = "\n\n".join([str(x) for x in output]) ###
+        #output = output.strip("\n")
+
+        if observation_prefix is not None:
+            trace_list_append(self._session_id,  f"\nobservation_prefix = {observation_prefix}\n")
         trace_list_append(self._session_id, f"\nOBSERVATION:  {output}")
-        # if llm_prefix:
-        #    trace_list_append(self._session_id,  f"\nllm_prefix = {llm_prefix}\n")
+        if llm_prefix:
+            trace_list_append(self._session_id,  f"\nllm_prefix = {llm_prefix}\n")
 
     def on_agent_finish(
         self, finish: AgentFinish, color: Optional[str] = None, **kwargs: Any
@@ -216,11 +224,6 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
     }
     llm = LLM_MODELS[model_type]
 
-    # Model output -> string
-    # parser = StrOutputParser()
-    # varcallhandler = VariableCallbackHandler()
-    # stdoutcallhandler = StdOutCallbackHandler()
-
     (
         llm_math_tool,
         weather_tool,
@@ -240,6 +243,8 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
     # print(arxiv_tool.invoke("List the title of 10 scientific papers about LLM agents published in this year.", verbose=True))
     # print(websearch_tool.invoke("Who won the most Oscar in this year?"))
 
+    news_tool = TavilySearch(topic="news", max_results=5)
+    websearch_tool = TavilySearch(topic="general", max_results=5)
     tools = [
         llm_math_tool,
         news_tool,
@@ -248,20 +253,6 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
         wikipedia_tool,
         websearch_tool,
     ]
-
-    """if model_type == "Llama-v3.1-405b":
-        prompt_react = hub.pull("hwchase17/react")
-        agent = create_react_agent(llm, tools, prompt_react)
-    else:
-        prompt = ChatPromptTemplate.from_messages(
-            [
-                ("system", "{system_prompt}"),
-                ("placeholder", "{chat_history}"),
-                ("human", "{input}"),
-                ("placeholder", "{agent_scratchpad}"),
-            ]
-        )
-        agent = create_tool_calling_agent(llm, tools, prompt)"""
 
     prompt = ChatPromptTemplate.from_messages(
         [
@@ -286,9 +277,7 @@ def get_chain(session_id: str, model_type="mistral-large-latest"):
 
 
 def generate_system_prompt():
-    # return f"You're a helpful assistant. Always use tools to answer questions. Always use the Calculator for calculations, even when adding 2 numbers or calculating averages. The current date is {datetime.today().strftime('%Y-%m-%d')}."
     return f"You're a helpful assistant. Always use tools to answer questions. Always use the Calculator for calculations, even when adding 2 numbers or calculating averages. The current date is {datetime.today().strftime('%Y-%m-%d')}"
-
 
 def clear_texts(session_id):
     global trace_list
@@ -297,7 +286,6 @@ def clear_texts(session_id):
         del trace_list[session_id]
 
     return "", [], ""
-
 
 def thoughts_func(session_id) -> str | None:
     # print()
